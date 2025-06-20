@@ -7,8 +7,9 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { UploadCloud, Camera, Share2, Download, RotateCcw, CheckCircle, AlertTriangle, Image as ImageIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const FRAME_IMAGE_URL = '/perfectum-frame.png'; // Ensure this image exists in public/images
+const FRAME_IMAGE_URL = '/images/perfectum-frame.png'; // Corrected path
 const CANVAS_WIDTH = 360; // For 9:16 aspect ratio
 const CANVAS_HEIGHT = 640;
 
@@ -128,28 +129,56 @@ export default function PhotoProcessor() {
     }
   };
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" } });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      setStep('camera');
-    } catch (err) {
-      toast({
-        title: 'Camera Error',
-        description: 'Could not access camera. Please ensure permissions are granted.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
+  }, []);
+
+  const reset = useCallback(() => {
+    stopCamera();
+    setUserImageSrc(null);
+    setProcessedImageSrc(null);
+    setIsProcessing(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    setStep('initial');
+  }, [stopCamera]);
+
+  useEffect(() => {
+    const enableCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" } });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err) {
+        toast({
+          title: 'Camera Error',
+          description: 'Could not access camera. Please ensure permissions are granted.',
+          variant: 'destructive',
+        });
+        reset();
+      }
+    };
+    
+    if (step === 'camera') {
+      enableCamera();
+    } else {
+      stopCamera();
+    }
+
+    return () => {
+        stopCamera();
+    }
+  }, [step, toast, reset, stopCamera]);
+
+
+  const startCamera = () => {
+    setStep('camera');
   };
 
   const capturePhoto = () => {
@@ -159,9 +188,13 @@ export default function PhotoProcessor() {
       tempCanvas.width = video.videoWidth;
       tempCanvas.height = video.videoHeight;
       const ctx = tempCanvas.getContext('2d');
-      ctx?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      if (ctx) {
+        // Flip the image horizontally to match the mirrored preview
+        ctx.translate(video.videoWidth, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+      }
       setUserImageSrc(tempCanvas.toDataURL('image/png'));
-      stopCamera();
       setStep('preview');
     }
   };
@@ -200,22 +233,6 @@ export default function PhotoProcessor() {
     }
   };
 
-  const reset = () => {
-    stopCamera();
-    setUserImageSrc(null);
-    setProcessedImageSrc(null);
-    setIsProcessing(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Reset file input
-    }
-    setStep('initial');
-  };
-
-  useEffect(() => {
-    // Cleanup camera on unmount
-    return () => stopCamera();
-  }, []);
-
   return (
     <Card className="w-full shadow-xl rounded-lg overflow-hidden bg-card">
       <CardHeader className="bg-muted/50">
@@ -224,13 +241,11 @@ export default function PhotoProcessor() {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
-        {/* Hidden canvas for processing */}
         <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
 
         {step === 'initial' && (
           <div className="animate-fade-in space-y-4">
             <p className="text-center text-muted-foreground">Choose how to add your photo:</p>
-            <div className="flex space-x-4">
             <Button onClick={startCamera} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:scale-105 py-5 text-base" aria-label="Use Camera">
               <Camera className="mr-2 h-6 w-6" /> Use Camera
             </Button>              
@@ -238,15 +253,15 @@ export default function PhotoProcessor() {
               <UploadCloud className="mr-2 h-6 w-6" /> Upload a Photo
             </Button>
             <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
-            </div>
           </div>
         )}
 
+        <div className={cn("bg-muted rounded-lg overflow-hidden aspect-[9/16] w-full max-w-xs mx-auto shadow-inner", step !== 'camera' && 'hidden')}>
+          <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover scale-x-[-1]" aria-label="Camera feed"></video>
+        </div>
+
         {step === 'camera' && (
           <div className="animate-fade-in space-y-4">
-            <div className="bg-muted rounded-lg overflow-hidden aspect-[9/16] w-full max-w-xs mx-auto shadow-inner">
-              <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" aria-label="Camera feed"></video>
-            </div>
             <Button onClick={capturePhoto} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground transition-all duration-300 transform hover:scale-105 py-3 text-base" aria-label="Capture Photo">
               <CheckCircle className="mr-2 h-6 w-6" /> Capture Photo
             </Button>
