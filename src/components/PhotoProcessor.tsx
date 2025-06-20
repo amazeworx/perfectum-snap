@@ -285,11 +285,11 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
         <CardContent className="p-6 space-y-6">
           <div className="animate-fade-in space-y-4">
             <p className="text-center text-muted-foreground">Choose how to add your photo:</p>
-            <Button onClick={startCamera} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:scale-105 py-5 text-base" aria-label="Use Camera">
-              <Camera className="mr-2 h-6 w-6" /> Use Camera
+            <Button onClick={startCamera} size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:shadow-lg hover:-translate-y-[2px] py-4 text-sm" aria-label="Use Camera">
+              <Camera className="mr-1.5 h-8 w-8" /> Use Camera
             </Button>              
-            <Button onClick={() => fileInputRef.current?.click()} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:scale-105 py-5 text-base" aria-label="Upload a Photo">
-              <UploadCloud className="mr-2 h-6 w-6" /> Upload a Photo
+            <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full bg-white hover:bg-white text-primary hover:text-primary border border-primary transition-all duration-300 transform hover:shadow-lg hover:-translate-y-[2px] py-4 text-sm" aria-label="Upload a Photo">
+              <UploadCloud className="mr-1.5 h-10 w-10" /> Upload a Photo
             </Button>
             <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
           </div>
@@ -297,7 +297,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       )}
 
       {step === 'preview' && (
-        <div className="relative w-full h-full animate-fade-in">
+        <div className="relative w-full h-screen animate-fade-in">
           {isProcessing && (
             <div className="flex flex-col items-center justify-center h-full text-white bg-black">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-3"></div>
@@ -315,19 +315,19 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
                 onError={handleImageError}
                 priority
               />
-              <div className="fixed bottom-8 right-4 z-20 flex flex-col-reverse items-center gap-4">
+              <div className="fixed bottom-4 right-4 z-20 flex flex-row-reverse items-center gap-2">
                 <Button
                   onClick={handleShare}
-                  className="h-16 w-16 rounded-full bg-accent text-accent-foreground shadow-lg transition-transform transform hover:scale-110 hover:bg-accent/90"
+                  className="h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg transition-transform transform hover:scale-105 hover:bg-accent/90"
                   aria-label="Share Image"
                 >
-                  <Share2 className="h-8 w-8" />
+                  <Share2 className="h-10 w-10" />
                 </Button>
                 <Button
                   onClick={handleDownload}
                   variant="ghost"
                   size="icon"
-                  className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                  className="h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70"
                   aria-label="Download Image"
                 >
                   <Download className="h-6 w-6" />
@@ -336,7 +336,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
                   onClick={reset}
                   variant="ghost"
                   size="icon"
-                  className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                  className="h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70"
                   aria-label="Start Over"
                 >
                   <RotateCcw className="h-6 w-6" />
