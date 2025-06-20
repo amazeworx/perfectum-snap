@@ -3,10 +3,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, Camera, Share2, Download, RotateCcw, CheckCircle, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { UploadCloud, Camera, Share2, Download, RotateCcw, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const FRAME_IMAGE_URL = '/images/perfectum-frame.png';
@@ -100,7 +100,6 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       
       setProcessedImageSrc(canvas.toDataURL('image/png'));
       setIsProcessing(false);
-      toast({ title: "Success", description: "Image processed successfully!", className: "bg-green-500 text-white" });
     };
 
     userImg.onerror = () => {
@@ -120,6 +119,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      onCameraToggle(true);
       const reader = new FileReader();
       reader.onload = (e) => {
         setUserImageSrc(e.target?.result as string);
@@ -197,7 +197,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       }
       setUserImageSrc(tempCanvas.toDataURL('image/png'));
       setStep('preview');
-      onCameraToggle(false);
+      onCameraToggle(true);
     }
   };
 
@@ -272,7 +272,12 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
   }
 
   return (
-    <Card className="w-full shadow-xl rounded-lg overflow-hidden bg-card">
+    <Card className={cn(
+      "w-full",
+      step === 'initial'
+        ? "shadow-xl rounded-lg overflow-hidden bg-card"
+        : "h-full shadow-none rounded-none border-none bg-black"
+    )}>
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
 
       {step === 'initial' && (
@@ -291,54 +296,68 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       )}
 
       {step === 'preview' && (
-        <>
-          <CardContent className="p-6 space-y-6">
-            <div className="animate-fade-in space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-center text-primary">Your Masterpiece</h3>
-                {isProcessing && (
-                  <div className="flex flex-col items-center justify-center p-4 bg-muted/50 rounded-lg">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-3"></div>
-                    <p className="text-muted-foreground">Processing your image...</p>
-                  </div>
-                )}
-                {!isProcessing && processedImageSrc && (
-                  <div className="bg-muted rounded-lg overflow-hidden aspect-[9/16] w-full max-w-xs mx-auto shadow-lg border border-primary/30">
-                    <Image src={processedImageSrc} alt="Processed Snap" width={CANVAS_WIDTH} height={CANVAS_HEIGHT} className="w-full h-full object-contain" onError={handleImageError} priority />
-                  </div>
-                )}
-                 {!isProcessing && !processedImageSrc && userImageSrc && (
-                   <div className="flex flex-col items-center justify-center p-4 bg-muted/50 rounded-lg">
-                    <AlertTriangle className="h-12 w-12 text-destructive mb-3" />
-                    <p className="text-muted-foreground">Could not process image. Frame might be missing.</p>
-                  </div>
-                 )}
+        <div className="relative w-full h-full animate-fade-in">
+          {isProcessing && (
+            <div className="flex flex-col items-center justify-center h-full text-white bg-black">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-3"></div>
+              <p className="text-muted-foreground">Processing your image...</p>
+            </div>
+          )}
+
+          {!isProcessing && processedImageSrc && (
+            <>
+              <Image
+                src={processedImageSrc}
+                alt="Your final snap"
+                fill
+                className="object-contain"
+                onError={handleImageError}
+                priority
+              />
+              <div className="fixed bottom-8 right-4 z-20 flex flex-col-reverse items-center gap-4">
+                <Button
+                  onClick={handleShare}
+                  className="h-16 w-16 rounded-full bg-accent text-accent-foreground shadow-lg transition-transform transform hover:scale-110 hover:bg-accent/90"
+                  aria-label="Share Image"
+                >
+                  <Share2 className="h-8 w-8" />
+                </Button>
+                <Button
+                  onClick={handleDownload}
+                  variant="ghost"
+                  size="icon"
+                  className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                  aria-label="Download Image"
+                >
+                  <Download className="h-6 w-6" />
+                </Button>
+                 <Button
+                  onClick={reset}
+                  variant="ghost"
+                  size="icon"
+                  className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                  aria-label="Start Over"
+                >
+                  <RotateCcw className="h-6 w-6" />
+                </Button>
               </div>
-              
-              {!isProcessing && processedImageSrc && (
-                <div className="grid grid-cols-2 gap-4">
-                  <Button onClick={handleDownload} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:scale-105" aria-label="Download Image">
-                    <Download className="mr-2 h-5 w-5" /> Download
-                  </Button>
-                  <Button onClick={handleShare} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground transition-all duration-300 transform hover:scale-105" aria-label="Share Image">
-                    <Share2 className="mr-2 h-5 w-5" /> Share
-                  </Button>
-                </div>
-              )}
-               <Button onClick={reset} variant="outline" className="w-full transition-colors duration-300" aria-label="Start Over">
+            </>
+          )}
+
+          {!isProcessing && !processedImageSrc && userImageSrc && (
+            <div className="flex flex-col items-center justify-center h-full bg-black text-white p-4 text-center">
+              <AlertTriangle className="h-12 w-12 text-destructive mb-3" />
+              <p className="text-muted-foreground">
+                There was an issue applying the frame.
+                <br/>
+                Please try again.
+              </p>
+               <Button onClick={reset} variant="outline" className="w-full max-w-xs mt-6 transition-colors duration-300" aria-label="Start Over">
                 <RotateCcw className="mr-2 h-5 w-5" /> Start Over
               </Button>
             </div>
-          </CardContent>
-          { (step === 'preview' && userImageSrc && !processedImageSrc && !isProcessing) &&
-            <CardFooter className="p-4 bg-destructive/10 border-t border-destructive/30">
-                 <p className="text-sm text-destructive text-center w-full">
-                    <AlertTriangle className="inline mr-1 h-4 w-4" />
-                    There was an issue applying the frame. The frame image might be missing or corrupted. Please try refreshing.
-                 </p>
-            </CardFooter>
-          }
-        </>
+          )}
+        </div>
       )}
     </Card>
   );
