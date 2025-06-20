@@ -330,7 +330,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       "w-full",
       step === 'initial'
         ? "shadow-xl rounded-lg overflow-hidden bg-card"
-        : "w-full h-full flex-grow shadow-none rounded-none border-none bg-black flex flex-col"
+        : "w-full h-dvh flex-grow shadow-none rounded-none border-none bg-black flex flex-col"
     )}>
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
 
@@ -350,7 +350,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       )}
 
       {step === 'preview' && (
-        <div className="relative w-full h-full animate-fade-in">
+        <div className="relative w-full h-dvh animate-fade-in">
           {isProcessing && (
             <div className="flex flex-col items-center justify-center h-full text-white bg-black">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-3"></div>
@@ -362,8 +362,8 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
             <>
               <Image
                 src={processedImageSrc}
-                alt="Your final snap"
-                fill
+                alt="Your final snap"    
+                fill            
                 className="object-contain"
                 onError={handleImageError}
                 priority
