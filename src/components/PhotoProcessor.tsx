@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, Camera, Share2, Download, RotateCcw, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { UploadCloud, Camera, Share2, Download, RotateCcw, AlertTriangle, ArrowLeft, SwitchCamera } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const FRAME_IMAGE_URL = '/images/perfectum-frame.png';
@@ -21,6 +21,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
   const [processedImageSrc, setProcessedImageSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [frameImage, setFrameImage] = useState<HTMLImageElement | null>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null); // For processing
@@ -151,37 +152,65 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
   }, [stopCamera, onCameraToggle]);
 
   useEffect(() => {
-    const enableCamera = async () => {
+    const enableCamera = async (mode: 'user' | 'environment') => {
+      // stopCamera is called by the cleanup function of this effect when dependencies change.
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" } });
+        const constraints = { 
+          video: { 
+            width: { ideal: 1280 }, 
+            height: { ideal: 720 }, 
+            facingMode: { exact: mode } 
+          } 
+        };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
       } catch (err) {
-        toast({
-          title: 'Camera Error',
-          description: 'Could not access camera. Please ensure permissions are granted.',
-          variant: 'destructive',
-        });
-        reset();
+        console.warn("Exact facing mode failed, falling back.", err);
+        // Fallback for browsers that don't support 'exact' or if the camera is not available.
+        try {
+            const fallbackConstraints = { 
+                video: { 
+                    width: { ideal: 1280 }, 
+                    height: { ideal: 720 }, 
+                    facingMode: mode
+                } 
+            };
+            const stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        } catch (finalErr) {
+            toast({
+                title: 'Camera Error',
+                description: 'Could not access the selected camera. Please ensure permissions are granted.',
+                variant: 'destructive',
+            });
+            reset();
+        }
       }
     };
     
     if (step === 'camera') {
-      enableCamera();
-    } else {
-      stopCamera();
+      enableCamera(facingMode);
     }
 
+    // Cleanup function: stop the camera when the step changes or component unmounts.
     return () => {
         stopCamera();
     }
-  }, [step, toast, reset, stopCamera]);
+  }, [step, facingMode, toast, reset, stopCamera]);
+
 
   const startCamera = () => {
     setStep('camera');
     onCameraToggle(true);
   };
+
+  const toggleCameraFacingMode = useCallback(() => {
+    setFacingMode(prevMode => prevMode === 'user' ? 'environment' : 'user');
+  }, []);
 
   const capturePhoto = () => {
     const video = videoRef.current;
@@ -191,14 +220,16 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       tempCanvas.height = video.videoHeight;
       const ctx = tempCanvas.getContext('2d');
       if (ctx) {
-        // Flip the image horizontally to match the mirrored preview
-        ctx.translate(video.videoWidth, 0);
-        ctx.scale(-1, 1);
+        // Flip the image horizontally only if it's the front camera to correct the mirror effect
+        if (facingMode === 'user') {
+          ctx.translate(video.videoWidth, 0);
+          ctx.scale(-1, 1);
+        }
         ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
       }
       setUserImageSrc(tempCanvas.toDataURL('image/png'));
       setStep('preview');
-      onCameraToggle(true);
+      onCameraToggle(true); // Keep the header hidden
     }
   };
 
@@ -240,7 +271,17 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
     return (
       <>
         <div className="fixed inset-0 bg-black z-0">
-          <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover scale-x-[-1]" aria-label="Camera feed"></video>
+          <video 
+            ref={videoRef} 
+            autoPlay 
+            playsInline 
+            muted 
+            className={cn(
+                "w-full h-full object-cover", 
+                facingMode === 'user' && "scale-x-[-1]"
+            )} 
+            aria-label="Camera feed">
+          </video>
           <Image
             src={FRAME_IMAGE_URL}
             alt="Frame Overlay"
@@ -260,13 +301,25 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
           <ArrowLeft className="h-6 w-6" />
         </Button>
         <div className="fixed bottom-[30px] left-0 right-0 flex justify-center z-20 pointer-events-none">
-          <Button
-            onClick={capturePhoto}
-            className="w-16 h-16 rounded-full bg-white hover:bg-gray-200 border-4 border-white/50 ring-2 ring-black/20 text-black shadow-lg flex items-center justify-center pointer-events-auto"
-            aria-label="Capture Photo"
-          >
-            <Camera className="h-10 w-10" />
-          </Button>
+            <div className="flex items-center gap-x-8 pointer-events-auto">
+              <div className="w-12 h-12" />
+              <Button
+                onClick={capturePhoto}
+                className="w-16 h-16 rounded-full bg-white hover:bg-gray-200 border-4 border-white/50 ring-2 ring-black/20 text-black shadow-lg flex items-center justify-center"
+                aria-label="Capture Photo"
+              >
+                <Camera className="h-10 w-10" />
+              </Button>
+              <Button
+                onClick={toggleCameraFacingMode}
+                variant="ghost"
+                size="icon"
+                className="w-12 h-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                aria-label="Switch Camera"
+              >
+                <SwitchCamera className="h-6 w-6" />
+              </Button>
+            </div>
         </div>
       </>
     );
