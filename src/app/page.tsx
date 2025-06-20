@@ -31,7 +31,10 @@ export default function HomePage() {
           </p>
         </header>
       )}
-      <main className={cn("w-full flex-grow", !isCameraActive && "max-w-2xl")}>
+      <main className={cn(
+          "w-full flex-grow flex flex-col",
+          !isCameraActive && "max-w-2xl"
+      )}>
         <PhotoProcessor onCameraToggle={setIsCameraActive} />
       </main>
     </div>

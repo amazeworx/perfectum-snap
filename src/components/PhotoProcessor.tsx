@@ -66,44 +66,47 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
     setIsProcessing(true);
     setProcessedImageSrc(null); // Clear previous processed image
 
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!canvas || !ctx) {
-      toast({ title: "Canvas Error", description: "Could not get canvas context.", variant: "destructive" });
-      setIsProcessing(false);
-      return;
-    }
+    // Use a timeout to allow the UI to update to the loading state before the canvas operation
+    setTimeout(() => {
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext('2d');
+        if (!canvas || !ctx) {
+          toast({ title: "Canvas Error", description: "Could not get canvas context.", variant: "destructive" });
+          setIsProcessing(false);
+          return;
+        }
 
-    canvas.width = CANVAS_WIDTH;
-    canvas.height = CANVAS_HEIGHT;
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
 
-    const userImg = new window.Image();
-    userImg.crossOrigin = 'anonymous';
-    userImg.src = userImageSrc;
+        const userImg = new window.Image();
+        userImg.crossOrigin = 'anonymous';
+        userImg.src = userImageSrc;
 
-    userImg.onload = () => {
-      // Calculate scaling to cover canvas while maintaining aspect ratio
-      const hRatio = CANVAS_WIDTH / userImg.width;
-      const vRatio = CANVAS_HEIGHT / userImg.height;
-      const ratio = Math.max(hRatio, vRatio);
-      const centerShift_x = (CANVAS_WIDTH - userImg.width * ratio) / 2;
-      const centerShift_y = (CANVAS_HEIGHT - userImg.height * ratio) / 2;
+        userImg.onload = () => {
+          // Calculate scaling to cover canvas while maintaining aspect ratio
+          const hRatio = CANVAS_WIDTH / userImg.width;
+          const vRatio = CANVAS_HEIGHT / userImg.height;
+          const ratio = Math.max(hRatio, vRatio);
+          const centerShift_x = (CANVAS_WIDTH - userImg.width * ratio) / 2;
+          const centerShift_y = (CANVAS_HEIGHT - userImg.height * ratio) / 2;
 
-      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      // Draw user image (scaled and centered)
-      ctx.drawImage(userImg, 0, 0, userImg.width, userImg.height, centerShift_x, centerShift_y, userImg.width * ratio, userImg.height * ratio);
-      
-      // Draw frame image on top
-      ctx.drawImage(frameImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      
-      setProcessedImageSrc(canvas.toDataURL('image/png'));
-      setIsProcessing(false);
-    };
+          ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          // Draw user image (scaled and centered)
+          ctx.drawImage(userImg, 0, 0, userImg.width, userImg.height, centerShift_x, centerShift_y, userImg.width * ratio, userImg.height * ratio);
+          
+          // Draw frame image on top
+          ctx.drawImage(frameImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          
+          setProcessedImageSrc(canvas.toDataURL('image/png'));
+          setIsProcessing(false);
+        };
 
-    userImg.onerror = () => {
-      toast({ title: "Image Load Error", description: "Failed to load user image for processing.", variant: "destructive" });
-      setIsProcessing(false);
-    };
+        userImg.onerror = () => {
+          toast({ title: "Image Load Error", description: "Failed to load user image for processing.", variant: "destructive" });
+          setIsProcessing(false);
+        };
+    }, 50);
 
   }, [userImageSrc, frameImage, toast]);
 
@@ -274,7 +277,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       "w-full",
       step === 'initial'
         ? "shadow-xl rounded-lg overflow-hidden bg-card"
-        : "h-full shadow-none rounded-none border-none bg-black"
+        : "flex-grow shadow-none rounded-none border-none bg-black flex flex-col"
     )}>
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
 
