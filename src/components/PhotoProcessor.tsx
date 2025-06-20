@@ -232,10 +232,10 @@ export default function PhotoProcessor() {
             <p className="text-center text-muted-foreground">Choose how to add your photo:</p>
             <div className="flex space-x-4">
             <Button onClick={startCamera} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:scale-105 py-5 text-base" aria-label="Use Camera">
-              <Camera className="mr-2 h-5 w-5" /> Use Camera
+              <Camera className="mr-2 h-6 w-6" /> Use Camera
             </Button>              
             <Button onClick={() => fileInputRef.current?.click()} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:scale-105 py-5 text-base" aria-label="Upload a Photo">
-              <UploadCloud className="mr-2 h-5 w-5" /> Upload a Photo
+              <UploadCloud className="mr-2 h-6 w-6" /> Upload a Photo
             </Button>
             <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
             </div>
@@ -248,7 +248,7 @@ export default function PhotoProcessor() {
               <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" aria-label="Camera feed"></video>
             </div>
             <Button onClick={capturePhoto} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground transition-all duration-300 transform hover:scale-105 py-3 text-base" aria-label="Capture Photo">
-              <CheckCircle className="mr-2 h-5 w-5" /> Capture Photo
+              <CheckCircle className="mr-2 h-6 w-6" /> Capture Photo
             </Button>
             <Button onClick={reset} variant="outline" className="w-full transition-colors duration-300" aria-label="Cancel Camera">
               Cancel
