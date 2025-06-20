@@ -10,11 +10,11 @@ export default function HomePage() {
 
   return (
     <div className={cn(
-        "flex flex-col min-h-screen bg-background text-foreground",
+        "flex flex-col min-h-dvh bg-background text-foreground",
         !isCameraActive && "items-center p-4 sm:p-6 md:p-8"
     )}>
       {!isCameraActive && (
-        <header className="flex flex-col items-center text-center mb-8 w-full max-w-2xl">
+        <header className="flex flex-col items-center text-center mb-8 pt-8 w-full max-w-2xl">
           <Image 
             src="/images/perfectum-icon.png" 
             alt="Perfectum Snap Logo" 
@@ -23,11 +23,11 @@ export default function HomePage() {
             className="mb-4 rounded-full shadow-lg"
             data-ai-hint="logo camera" 
           />
-          <h1 className="text-4xl sm:text-5xl font-headline font-bold text-primary">
+          <h1 className="text-[36px] font-headline font-bold text-primary">
             Perfectum Snap
           </h1>
-          <p className="text-lg text-muted-foreground mt-2 max-w-md">
-            Capture, frame, and share your perfect moments. Start by selecting a photo source below.
+          <p className="text-base text-muted-foreground mt-2 max-w-md">
+            Capture and share your perfect moments with Perfectum.
           </p>
         </header>
       )}

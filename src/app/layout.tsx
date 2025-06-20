@@ -11,7 +11,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'Perfectum Snap',
-  description: 'Create perfectly framed photos with Perfectum Snap.',
+  description: 'Capture and share your perfect moments with Perfectum.',
 };
 
 export default function RootLayout({
