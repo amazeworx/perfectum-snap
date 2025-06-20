@@ -3,10 +3,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, Camera, Share2, Download, RotateCcw, CheckCircle, AlertTriangle, Image as ImageIcon } from 'lucide-react';
+import { UploadCloud, Camera, Share2, Download, RotateCcw, CheckCircle, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const FRAME_IMAGE_URL = '/images/perfectum-frame.png'; // Corrected path
@@ -235,11 +235,6 @@ export default function PhotoProcessor() {
 
   return (
     <Card className="w-full shadow-xl rounded-lg overflow-hidden bg-card">
-      <CardHeader className="bg-muted/50">
-        <CardTitle className="text-center text-xl font-headline text-primary flex items-center justify-center">
-          <ImageIcon className="mr-2 h-6 w-6" /> Create Your Snap
-        </CardTitle>
-      </CardHeader>
       <CardContent className="p-6 space-y-6">
         <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
 
