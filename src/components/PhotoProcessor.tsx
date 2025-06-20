@@ -262,10 +262,10 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
         <div className="fixed bottom-[30px] left-0 right-0 flex justify-center z-20 pointer-events-none">
           <Button
             onClick={capturePhoto}
-            className="w-20 h-20 rounded-full bg-white hover:bg-gray-200 border-4 border-white/50 ring-2 ring-black/20 text-black shadow-lg flex items-center justify-center pointer-events-auto"
+            className="w-16 h-16 rounded-full bg-white hover:bg-gray-200 border-4 border-white/50 ring-2 ring-black/20 text-black shadow-lg flex items-center justify-center pointer-events-auto"
             aria-label="Capture Photo"
           >
-            <Camera className="h-8 w-8" />
+            <Camera className="h-10 w-10" />
           </Button>
         </div>
       </>
@@ -277,7 +277,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       "w-full",
       step === 'initial'
         ? "shadow-xl rounded-lg overflow-hidden bg-card"
-        : "flex-grow shadow-none rounded-none border-none bg-black flex flex-col"
+        : "w-full h-full flex-grow shadow-none rounded-none border-none bg-black flex flex-col"
     )}>
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
 
@@ -297,7 +297,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       )}
 
       {step === 'preview' && (
-        <div className="relative w-full h-screen animate-fade-in">
+        <div className="relative w-full h-full animate-fade-in">
           {isProcessing && (
             <div className="flex flex-col items-center justify-center h-full text-white bg-black">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-3"></div>
