@@ -20,9 +20,6 @@ export default function CreationPage() {
       <main className="w-full max-w-2xl flex-grow">
         <PhotoProcessor />
       </main>
-       <footer className="w-full max-w-2xl mt-8 py-4 text-center text-sm text-muted-foreground border-t">
-        <p>&copy; {new Date().getFullYear()} Perfectum Snap. Frame your moments.</p>
-      </footer>
     </div>
   );
 }

@@ -230,13 +230,15 @@ export default function PhotoProcessor() {
         {step === 'initial' && (
           <div className="animate-fade-in space-y-4">
             <p className="text-center text-muted-foreground">Choose how to add your photo:</p>
-            <Button onClick={() => fileInputRef.current?.click()} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:scale-105 py-3 text-base" aria-label="Upload a Photo">
+            <div className="flex space-x-4">
+            <Button onClick={startCamera} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:scale-105 py-5 text-base" aria-label="Use Camera">
+              <Camera className="mr-2 h-5 w-5" /> Use Camera
+            </Button>              
+            <Button onClick={() => fileInputRef.current?.click()} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:scale-105 py-5 text-base" aria-label="Upload a Photo">
               <UploadCloud className="mr-2 h-5 w-5" /> Upload a Photo
             </Button>
             <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
-            <Button onClick={startCamera} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:scale-105 py-3 text-base" aria-label="Use Camera">
-              <Camera className="mr-2 h-5 w-5" /> Use Camera
-            </Button>
+            </div>
           </div>
         )}
 

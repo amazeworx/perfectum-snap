@@ -7,8 +7,8 @@ export default function HomePage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-8">
       <main className="flex flex-col items-center justify-center text-center w-full max-w-md">
         <Image 
-          src="https://placehold.co/150x150.png" 
-          alt="Perfectum Snap Logo Placeholder" 
+          src="/images/perfectum-icon.png" 
+          alt="Perfectum Snap Logo" 
           width={120} 
           height={120} 
           className="mb-8 rounded-full shadow-lg"
@@ -18,7 +18,7 @@ export default function HomePage() {
           Perfectum Snap
         </h1>
         <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-xs sm:max-w-sm">
-          Capture, frame, and share your perfect moments effortlessly.
+          Capture, frame, and share your perfect moments with Perfectum.
         </p>
         <Link href="/create" passHref>
           <Button 
@@ -31,9 +31,6 @@ export default function HomePage() {
           </Button>
         </Link>
       </main>
-      <footer className="absolute bottom-4 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} Perfectum Snap. All rights reserved.</p>
-      </footer>
     </div>
   );
 }
