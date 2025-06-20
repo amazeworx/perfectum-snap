@@ -20,10 +20,10 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
   const [userImageSrc, setUserImageSrc] = useState<string | null>(null);
   const [processedImageSrc, setProcessedImageSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [frameImage, setFrameImage] = useState<HTMLImageElement | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null); // For processing
-  const frameImageRef = useRef<HTMLImageElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
@@ -34,7 +34,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
     img.crossOrigin = 'anonymous';
     img.src = FRAME_IMAGE_URL;
     img.onload = () => {
-      frameImageRef.current = img;
+      setFrameImage(img);
     };
     img.onerror = () => {
       toast({
@@ -56,8 +56,8 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
   };
 
   const processImage = useCallback(async () => {
-    if (!userImageSrc || !frameImageRef.current) {
-      if (!frameImageRef.current) {
+    if (!userImageSrc || !frameImage) {
+      if (!frameImage) {
          toast({ title: "Frame Error", description: "Frame image not loaded yet.", variant: "destructive" });
       }
       return;
@@ -94,9 +94,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       ctx.drawImage(userImg, 0, 0, userImg.width, userImg.height, centerShift_x, centerShift_y, userImg.width * ratio, userImg.height * ratio);
       
       // Draw frame image on top
-      if (frameImageRef.current) {
-        ctx.drawImage(frameImageRef.current, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      }
+      ctx.drawImage(frameImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       
       setProcessedImageSrc(canvas.toDataURL('image/png'));
       setIsProcessing(false);
@@ -107,13 +105,13 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       setIsProcessing(false);
     };
 
-  }, [userImageSrc, toast]);
+  }, [userImageSrc, frameImage, toast]);
 
   useEffect(() => {
-    if (userImageSrc && frameImageRef.current && step === 'preview') {
+    if (userImageSrc && frameImage && step === 'preview') {
       processImage();
     }
-  }, [userImageSrc, processImage, step]);
+  }, [userImageSrc, frameImage, processImage, step]);
 
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {

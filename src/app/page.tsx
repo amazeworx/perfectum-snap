@@ -10,8 +10,8 @@ export default function HomePage() {
 
   return (
     <div className={cn(
-        "flex flex-col items-center min-h-screen bg-background text-foreground",
-        !isCameraActive && "p-4 sm:p-6 md:p-8"
+        "flex flex-col min-h-screen bg-background text-foreground",
+        !isCameraActive && "items-center p-4 sm:p-6 md:p-8"
     )}>
       {!isCameraActive && (
         <header className="flex flex-col items-center text-center mb-8 w-full max-w-2xl">
