@@ -1,22 +1,5 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import PhotoProcessor from '@/components/PhotoProcessor';
+import { redirect } from 'next/navigation';
 
-export default function CreationPage() {
-  return (
-    <div className="flex flex-col items-center min-h-screen bg-background text-foreground p-4">
-      <header className="w-full max-w-2xl mb-6 flex items-center justify-start">
-        <Link href="/" passHref>
-          <Button variant="ghost" className="text-primary hover:text-primary/80 transition-colors">
-            <ArrowLeft className="mr-2 h-5 w-5" />
-            Back to Home
-          </Button>
-        </Link>
-      </header>
-      <main className="w-full max-w-2xl flex-grow">
-        <PhotoProcessor />
-      </main>
-    </div>
-  );
+export default function CreatePage() {
+  redirect('/');
 }
