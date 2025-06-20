@@ -12,6 +12,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Perfectum Snap',
   description: 'Capture and share your perfect moments with Perfectum.',
+  openGraph: {
+    title: 'Perfectum Snap',
+    description: 'Capture and share your perfect moments with Perfectum.',
+  },
 };
 
 export default function RootLayout({
