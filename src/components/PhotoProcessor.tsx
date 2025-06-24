@@ -12,7 +12,7 @@ import type { ViewMode } from '@/app/page';
 
 const CANVAS_WIDTH = 360;
 const CANVAS_HEIGHT = 640;
-const FRAMES = Array(4).fill('/images/perfectum-frame.png'); // Placeholder for 4 frames
+const FRAMES = Array(4).fill('https://placehold.co/360x640.png'); // Placeholder for 4 frames
 
 type Step = 'frame-selection' | 'camera' | 'preview';
 
