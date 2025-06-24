@@ -2,25 +2,43 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { UploadCloud, Camera, Share2, Download, RotateCcw, AlertTriangle, ArrowLeft, SwitchCamera, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { ViewMode } from '@/app/page';
 
 const CANVAS_WIDTH = 360;
 const CANVAS_HEIGHT = 640;
-const FRAMES = Array(4).fill('https://placehold.co/360x640.png'); // Placeholder for 4 frames
+
+const TEMPLATES = [
+  {
+    template: 'https://placehold.co/360x640.png',
+    frame: 'https://placehold.co/360x640.png',
+    hint: 'abstract modern'
+  },
+  {
+    template: 'https://placehold.co/360x640.png',
+    frame: 'https://placehold.co/360x640.png',
+    hint: 'vintage classic'
+  },
+  {
+    template: 'https://placehold.co/360x640.png',
+    frame: 'https://placehold.co/360x640.png',
+    hint: 'nature floral'
+  },
+  {
+    template: 'https://placehold.co/360x640.png',
+    frame: 'https://placehold.co/360x640.png',
+    hint: 'geometric pattern'
+  },
+];
+
 
 type Step = 'frame-selection' | 'camera' | 'preview';
 
-interface PhotoProcessorProps {
-  onViewModeChange: (mode: ViewMode) => void;
-}
-
-export default function PhotoProcessor({ onViewModeChange }: PhotoProcessorProps) {
+export default function PhotoProcessor() {
   const [step, setStep] = useState<Step>('frame-selection');
   const [userImageSrc, setUserImageSrc] = useState<string | null>(null);
   const [processedImageSrc, setProcessedImageSrc] = useState<string | null>(null);
@@ -37,11 +55,6 @@ export default function PhotoProcessor({ onViewModeChange }: PhotoProcessorProps
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
-
-  useEffect(() => {
-    const isFullscreen = isFrameExpanded || step === 'camera' || step === 'preview';
-    onViewModeChange(isFullscreen ? 'fullscreen' : 'home');
-  }, [isFrameExpanded, step, onViewModeChange]);
 
   useEffect(() => {
     if (!selectedFrameUrl) {
@@ -64,7 +77,7 @@ export default function PhotoProcessor({ onViewModeChange }: PhotoProcessorProps
 
   const handleFrameSelect = (index: number) => {
     setSelectedFrameIndex(index);
-    setSelectedFrameUrl(FRAMES[index]);
+    setSelectedFrameUrl(TEMPLATES[index].frame);
     setIsFrameExpanded(true);
   };
   
@@ -147,7 +160,6 @@ export default function PhotoProcessor({ onViewModeChange }: PhotoProcessorProps
       reader.onload = (e) => {
         setUserImageSrc(e.target?.result as string);
         setStep('preview');
-        handleCloseExpandedFrame();
       };
       reader.readAsDataURL(file);
     }
@@ -215,7 +227,6 @@ export default function PhotoProcessor({ onViewModeChange }: PhotoProcessorProps
 
   const startCamera = () => {
     setStep('camera');
-    handleCloseExpandedFrame();
   };
 
   const toggleCameraFacingMode = useCallback(() => {
@@ -277,35 +288,33 @@ export default function PhotoProcessor({ onViewModeChange }: PhotoProcessorProps
 
   if (step === 'camera') {
     return (
-      <>
-        <div className="fixed inset-0 bg-black z-0">
-          <video 
-            ref={videoRef} 
-            autoPlay 
-            playsInline 
-            muted 
-            className={cn(
-                "w-full h-full object-cover", 
-                facingMode === 'user' && "scale-x-[-1]"
-            )} 
-            aria-label="Camera feed">
-          </video>
-          {frameImage && (
-            <Image
-              src={frameImage.src}
-              alt="Frame Overlay"
-              fill
-              style={{ objectFit: 'contain' }}
-              className="pointer-events-none z-10"
-              priority
-            />
-          )}
-        </div>
+      <div className="fixed inset-0 bg-black">
+        <video 
+          ref={videoRef} 
+          autoPlay 
+          playsInline 
+          muted 
+          className={cn(
+              "w-full h-full object-cover", 
+              facingMode === 'user' && "scale-x-[-1]"
+          )} 
+          aria-label="Camera feed">
+        </video>
+        {frameImage && (
+          <Image
+            src={frameImage.src}
+            alt="Frame Overlay"
+            fill
+            style={{ objectFit: 'contain' }}
+            className="pointer-events-none z-10"
+            priority
+          />
+        )}
         <Button
           onClick={reset}
           variant="ghost"
           size="icon"
-          className="fixed top-4 left-4 z-20 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70 pointer-events-auto"
+          className="fixed top-4 left-4 z-20 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
           aria-label="Go Back"
         >
           <ArrowLeft className="h-6 w-6" />
@@ -331,7 +340,7 @@ export default function PhotoProcessor({ onViewModeChange }: PhotoProcessorProps
               </Button>
             </div>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -404,38 +413,40 @@ export default function PhotoProcessor({ onViewModeChange }: PhotoProcessorProps
 
   return (
     <>
-      <Card className="w-full shadow-xl rounded-lg overflow-hidden bg-card animate-fade-in">
-        <CardHeader>
-          <CardTitle className="text-center text-xl font-semibold">Choose your frame</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 sm:p-6">
-          <div className="grid grid-cols-2 gap-4">
-            {FRAMES.map((frameSrc, index) => (
-              <div
-                key={index}
-                className="aspect-[9/16] rounded-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95 shadow-md border"
-                onClick={() => handleFrameSelect(index)}
-                data-ai-hint="photo frame"
-              >
-                <Image
-                  src={frameSrc}
-                  alt={`Frame ${index + 1}`}
-                  width={180}
-                  height={320}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <header className="fixed top-0 left-0 right-0 z-50 flex items-center p-4 bg-black/50 backdrop-blur-sm">
+        <Link href="/" passHref>
+          <Button variant="ghost" size="icon" className="mr-2 text-white hover:bg-white/20">
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+        </Link>
+        <h1 className="text-xl font-semibold">Choose your frame</h1>
+      </header>
+
+      <main className="pt-24 p-4">
+        <div className="grid grid-cols-2 gap-4">
+          {TEMPLATES.map((item, index) => (
+            <div
+              key={index}
+              className="aspect-[9/16] rounded-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95 shadow-md border border-gray-700"
+              onClick={() => handleFrameSelect(index)}
+            >
+              <Image
+                src={item.template}
+                alt={`Template ${index + 1}`}
+                width={180}
+                height={320}
+                className="w-full h-full object-cover"
+                data-ai-hint={item.hint}
+              />
+            </div>
+          ))}
+        </div>
+      </main>
 
       <div className={cn(
-        "fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300",
-        isFrameExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
+        "fixed inset-0 z-[60] flex items-center justify-center transition-all duration-300",
+        isFrameExpanded ? "opacity-100 bg-black/80 backdrop-blur-sm" : "opacity-0 pointer-events-none"
       )}>
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={handleCloseExpandedFrame} />
-        
         <div 
             className={cn(
                 "relative transition-all duration-300 ease-out",
@@ -443,12 +454,12 @@ export default function PhotoProcessor({ onViewModeChange }: PhotoProcessorProps
             )}
             style={{ width: `${CANVAS_WIDTH}px`, height: `${CANVAS_HEIGHT}px` }}
         >
-            {selectedFrameUrl && (
+            {selectedFrameIndex !== null && (
                 <Image
-                    src={selectedFrameUrl}
-                    alt="Selected Frame"
+                    src={TEMPLATES[selectedFrameIndex].template}
+                    alt="Selected Template"
                     fill
-                    className="object-contain pointer-events-none"
+                    className="object-contain pointer-events-none rounded-lg"
                     priority
                 />
             )}
@@ -462,12 +473,12 @@ export default function PhotoProcessor({ onViewModeChange }: PhotoProcessorProps
               <X className="h-6 w-6" />
             </Button>
 
-            <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center gap-4 px-4 z-10">
-                <Button onClick={startCamera} size="lg" className="w-full py-6 text-base bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                    <Camera className="mr-2 h-6 w-6" /> Use Camera
+            <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-4 px-4 z-10">
+                <Button onClick={startCamera} size="lg" className="w-full py-4 text-base bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                    <Camera className="mr-2 h-5 w-5" /> Use Camera
                 </Button>              
-                <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-6 text-base bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
-                    <UploadCloud className="mr-2 h-6 w-6" /> Upload a Photo
+                <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-4 text-base bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
+                    <UploadCloud className="mr-2 h-5 w-5" /> Upload Photo
                 </Button>
                 <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
             </div>
