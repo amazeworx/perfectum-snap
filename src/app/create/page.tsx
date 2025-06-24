@@ -16,7 +16,7 @@ export default function CreatePage() {
       "min-h-dvh bg-black text-white transition-opacity duration-500",
       isMounted ? 'opacity-100' : 'opacity-0'
     )}>
-       <PhotoProcessor />
+      <PhotoProcessor />
     </div>
   );
 }

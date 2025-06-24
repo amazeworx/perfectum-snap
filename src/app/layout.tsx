@@ -10,10 +10,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Perfectum Snap',
+  title: 'BNI x Perfectum x OOTB',
   description: 'Capture and share your perfect moments with Perfectum.',
   openGraph: {
-    title: 'Perfectum Snap',
+    title: 'BNI x Perfectum x OOTB',
     description: 'Capture and share your perfect moments with Perfectum.',
   },
 };
@@ -30,11 +30,17 @@ export default function RootLayout({
             but kept as per original structure if specific weights/styles were linked.
             next/font handles this more optimally.
         */}
+        <link rel="icon" type="image/png" href="/images/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+        <link rel="shortcut icon" href="/images/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-title" content="BNI x Perfectum x OOTB" />
+        <link rel="manifest" href="/images/site.webmanifest" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased">
+      <body className="font-body antialiased bg-slate-800">
         {children}
         <Toaster />
       </body>

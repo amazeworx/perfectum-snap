@@ -1,6 +1,8 @@
+@import "tailwindcss-animated";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* @import "tailwindcss"; */
 
 @layer base {
   :root {
@@ -10,14 +12,14 @@
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 197.4 71.4% 52.4%; /* #29ABE2 */
-    --primary-foreground: 0 0% 100%; /* White text on primary */
+    --primary: #2D6CFF; /* #2D6CFF */
+    --primary-foreground: #FFFFFF; /* White text on primary */
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 33 100% 50%; /* #FF8C00 */
-    --accent-foreground: 0 0% 100%; /* White text on accent */
+    --accent: #4DEDED; /* #FF8C00 */
+    --accent-foreground: #1C6464; /* White text on accent */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 89.8%;
@@ -73,6 +75,10 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+  .theme {
+    --animate-star-movement-bottom: star-movement-bottom linear infinite alternate;
+    --animate-star-movement-top: star-movement-top linear infinite alternate;
+  }
 }
 
 @layer base {
@@ -83,3 +89,36 @@
     @apply bg-background text-foreground font-body antialiased;
   }
 }
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@theme inline {
+  @keyframes star-movement-bottom {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+    }
+  100% {
+    transform: translate(-100%, 0%);
+    opacity: 0;
+    }
+  }
+  @keyframes star-movement-top {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+    }
+  100% {
+    transform: translate(100%, 0%);
+    opacity: 0;
+    }
+  }
+}
+

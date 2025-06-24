@@ -5,12 +5,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from '@/hooks/use-toast';
 import { UploadCloud, Camera, Share2, Download, RotateCcw, AlertTriangle, ArrowLeft, SwitchCamera, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CANVAS_WIDTH = 360;
 const CANVAS_HEIGHT = 640;
+
+const LOCAL_URL = 'http://localhost:3000';
 
 const TEMPLATES = [
   {
@@ -39,6 +42,8 @@ const TEMPLATES = [
 type Step = 'frame-selection' | 'camera' | 'preview';
 
 export default function PhotoProcessor() {
+
+  const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({});
   const [step, setStep] = useState<Step>('frame-selection');
   const [userImageSrc, setUserImageSrc] = useState<string | null>(null);
   const [processedImageSrc, setProcessedImageSrc] = useState<string | null>(null);
@@ -75,12 +80,19 @@ export default function PhotoProcessor() {
     };
   }, [selectedFrameUrl, toast]);
 
+  const handleImageLoad = (index: number) => {
+    setLoadedImages(prevState => ({
+      ...prevState,
+      [index]: true,
+    }));
+  };
+
   const handleFrameSelect = (index: number) => {
     setSelectedFrameIndex(index);
     setSelectedFrameUrl(TEMPLATES[index].frame);
     setIsFrameExpanded(true);
   };
-  
+
   const handleCloseExpandedFrame = () => {
     setIsFrameExpanded(false);
   };
@@ -88,17 +100,17 @@ export default function PhotoProcessor() {
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = `https://placehold.co/${CANVAS_WIDTH}x${CANVAS_HEIGHT}.png`;
     e.currentTarget.alt = 'Error loading image';
-     toast({
-        title: 'Image Display Error',
-        description: 'There was an issue displaying the image.',
-        variant: 'destructive',
-      });
+    toast({
+      title: 'Image Display Error',
+      description: 'There was an issue displaying the image.',
+      variant: 'destructive',
+    });
   };
 
   const processImage = useCallback(async () => {
     if (!userImageSrc || !frameImage) {
       if (!frameImage) {
-         toast({ title: "Frame Error", description: "Frame image not loaded yet.", variant: "destructive" });
+        toast({ title: "Frame Error", description: "Frame image not loaded yet.", variant: "destructive" });
       }
       return;
     }
@@ -107,41 +119,41 @@ export default function PhotoProcessor() {
     setProcessedImageSrc(null);
 
     setTimeout(() => {
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext('2d');
-        if (!canvas || !ctx) {
-          toast({ title: "Canvas Error", description: "Could not get canvas context.", variant: "destructive" });
-          setIsProcessing(false);
-          return;
-        }
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d');
+      if (!canvas || !ctx) {
+        toast({ title: "Canvas Error", description: "Could not get canvas context.", variant: "destructive" });
+        setIsProcessing(false);
+        return;
+      }
 
-        canvas.width = CANVAS_WIDTH;
-        canvas.height = CANVAS_HEIGHT;
+      canvas.width = CANVAS_WIDTH;
+      canvas.height = CANVAS_HEIGHT;
 
-        const userImg = new window.Image();
-        userImg.crossOrigin = 'anonymous';
-        userImg.src = userImageSrc;
+      const userImg = new window.Image();
+      userImg.crossOrigin = 'anonymous';
+      userImg.src = userImageSrc;
 
-        userImg.onload = () => {
-          const hRatio = CANVAS_WIDTH / userImg.width;
-          const vRatio = CANVAS_HEIGHT / userImg.height;
-          const ratio = Math.max(hRatio, vRatio);
-          const centerShift_x = (CANVAS_WIDTH - userImg.width * ratio) / 2;
-          const centerShift_y = (CANVAS_HEIGHT - userImg.height * ratio) / 2;
+      userImg.onload = () => {
+        const hRatio = CANVAS_WIDTH / userImg.width;
+        const vRatio = CANVAS_HEIGHT / userImg.height;
+        const ratio = Math.max(hRatio, vRatio);
+        const centerShift_x = (CANVAS_WIDTH - userImg.width * ratio) / 2;
+        const centerShift_y = (CANVAS_HEIGHT - userImg.height * ratio) / 2;
 
-          ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-          ctx.drawImage(userImg, 0, 0, userImg.width, userImg.height, centerShift_x, centerShift_y, userImg.width * ratio, userImg.height * ratio);
-          
-          ctx.drawImage(frameImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-          
-          setProcessedImageSrc(canvas.toDataURL('image/png'));
-          setIsProcessing(false);
-        };
+        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        ctx.drawImage(userImg, 0, 0, userImg.width, userImg.height, centerShift_x, centerShift_y, userImg.width * ratio, userImg.height * ratio);
 
-        userImg.onerror = () => {
-          toast({ title: "Image Load Error", description: "Failed to load user image for processing.", variant: "destructive" });
-          setIsProcessing(false);
-        };
+        ctx.drawImage(frameImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        setProcessedImageSrc(canvas.toDataURL('image/png'));
+        setIsProcessing(false);
+      };
+
+      userImg.onerror = () => {
+        toast({ title: "Image Load Error", description: "Failed to load user image for processing.", variant: "destructive" });
+        setIsProcessing(false);
+      };
     }, 50);
 
   }, [userImageSrc, frameImage, toast]);
@@ -151,7 +163,6 @@ export default function PhotoProcessor() {
       processImage();
     }
   }, [userImageSrc, frameImage, processImage, step]);
-
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -188,6 +199,17 @@ export default function PhotoProcessor() {
     setFrameImage(null);
   }, [stopCamera]);
 
+  const resetCamera = useCallback(() => {
+    stopCamera();
+    setUserImageSrc(null);
+    setProcessedImageSrc(null);
+    setIsProcessing(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    setStep('camera');
+  }, [stopCamera]);
+
   useEffect(() => {
     const enableCamera = async (mode: 'user' | 'environment') => {
       try {
@@ -199,28 +221,28 @@ export default function PhotoProcessor() {
       } catch (err) {
         console.warn("Exact facing mode failed, falling back.", err);
         try {
-            const fallbackConstraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: mode } };
-            const stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-            }
+          const fallbackConstraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: mode } };
+          const stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
         } catch (finalErr) {
-            toast({
-                title: 'Camera Error',
-                description: 'Could not access the selected camera. Please ensure permissions are granted.',
-                variant: 'destructive',
-            });
-            reset();
+          toast({
+            title: 'Camera Error',
+            description: 'Could not access the selected camera. Please ensure permissions are granted.',
+            variant: 'destructive',
+          });
+          reset();
         }
       }
     };
-    
+
     if (step === 'camera') {
       enableCamera(facingMode);
     }
 
     return () => {
-        stopCamera();
+      stopCamera();
     }
   }, [step, facingMode, toast, reset, stopCamera]);
 
@@ -256,7 +278,7 @@ export default function PhotoProcessor() {
     if (processedImageSrc) {
       const link = document.createElement('a');
       link.href = processedImageSrc;
-      link.download = 'perfectum_snap.png';
+      link.download = 'bni_x_perfectum_x_ootb.png';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -270,7 +292,7 @@ export default function PhotoProcessor() {
       const response = await fetch(processedImageSrc);
       const blob = await response.blob();
       const file = new File([blob], 'perfectum_snap.png', { type: 'image/png' });
-      
+
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
@@ -290,15 +312,15 @@ export default function PhotoProcessor() {
     <>
       {step === 'camera' && (
         <div className="fixed inset-0 bg-black">
-          <video 
-            ref={videoRef} 
-            autoPlay 
-            playsInline 
-            muted 
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
             className={cn(
-                "w-full h-full object-cover", 
-                facingMode === 'user' && "scale-x-[-1]"
-            )} 
+              "w-full h-full object-cover",
+              facingMode === 'user' && "scale-x-[-1]"
+            )}
             aria-label="Camera feed">
           </video>
           {frameImage && (
@@ -311,175 +333,197 @@ export default function PhotoProcessor() {
               priority
             />
           )}
-          <Button
-            onClick={reset}
-            variant="ghost"
-            size="icon"
-            className="fixed top-4 left-4 z-20 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
-            aria-label="Go Back"
-          >
-            <ArrowLeft className="h-6 w-6" />
-          </Button>
-          <div className="fixed bottom-[30px] left-0 right-0 flex justify-center z-20 pointer-events-none">
-              <div className="flex items-center gap-x-8 pointer-events-auto">
-                <div className="w-12 h-12" />
-                <Button
-                  onClick={capturePhoto}
-                  className="w-16 h-16 rounded-full bg-white hover:bg-gray-200 border-4 border-white/50 ring-2 ring-black/20 text-black shadow-lg flex items-center justify-center"
-                  aria-label="Capture Photo"
-                >
-                  <Camera className="h-10 w-10" />
-                </Button>
-                <Button
-                  onClick={toggleCameraFacingMode}
-                  variant="ghost"
-                  size="icon"
-                  className="w-12 h-12 rounded-full bg-black/50 text-white hover:bg-black/70"
-                  aria-label="Switch Camera"
-                >
-                  <SwitchCamera className="h-6 w-6" />
-                </Button>
-              </div>
+          <div className="fixed pb-6 top-0 left-0 right-0 p-4 flex z-20 bg-gradient-to-b from-black/90 to-transparent">
+            <Button
+              onClick={reset}
+              variant="ghost"
+              size="icon"
+              className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+              aria-label="Go Back"
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+          </div>
+          <div className="fixed h-24 bottom-0 left-0 right-0 z-20 pointer-events-none bg-gradient-to-t from-black/90 to-transparent">
+          </div>
+          <div className="fixed bottom-6 left-0 right-0 flex justify-center z-20">
+            <div className="flex items-center gap-x-16 pointer-events-auto">
+              <div className="w-12 h-12" />
+              <Button
+                onClick={capturePhoto}
+                className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-accent hover:bg-primary/80 border-2 border-white ring-2 ring-primary/20 text-white shadow-lg flex items-center justify-center [&_svg]:size-6"
+                size="icon"
+                aria-label="Capture Photo"
+              >
+                <Camera className="h-16 w-16" />
+              </Button>
+              <Button
+                onClick={toggleCameraFacingMode}
+                variant="ghost"
+                size="icon"
+                className="w-12 h-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                aria-label="Switch Camera"
+              >
+                <SwitchCamera className="h-6 w-6" />
+              </Button>
+            </div>
           </div>
         </div>
       )}
 
       {step === 'preview' && (
-          <div className="relative w-full h-dvh animate-fade-in bg-black">
-            {isProcessing && (
-              <div className="flex flex-col items-center justify-center h-full text-white">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-3"></div>
-                <p className="text-muted-foreground">Processing your image...</p>
-              </div>
-            )}
-
-            {!isProcessing && processedImageSrc && (
-              <>
-                <Image
-                  src={processedImageSrc}
-                  alt="Your final snap"    
-                  fill            
-                  className="object-contain"
-                  onError={handleImageError}
-                  priority
-                />
-                <div className="fixed bottom-4 right-4 z-20 flex flex-row-reverse items-center gap-2">
-                  <Button
-                    onClick={handleShare}
-                    className="h-14 w-14 rounded-full bg-accent text-accent-foreground shadow-lg transition-transform transform hover:scale-105 hover:bg-accent/90"
-                    aria-label="Share Image"
-                  >
-                    <Share2 className="h-10 w-10" />
-                  </Button>
-                  <Button
-                    onClick={handleDownload}
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70"
-                    aria-label="Download Image"
-                  >
-                    <Download className="h-6 w-6" />
-                  </Button>
-                   <Button
-                    onClick={reset}
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70"
-                    aria-label="Start Over"
-                  >
-                    <RotateCcw className="h-6 w-6" />
-                  </Button>
-                </div>
-              </>
-            )}
-
-            {!isProcessing && !processedImageSrc && userImageSrc && (
-              <div className="flex flex-col items-center justify-center h-full text-white p-4 text-center">
-                <AlertTriangle className="h-12 w-12 text-destructive mb-3" />
-                <p className="text-muted-foreground">
-                  There was an issue applying the frame.
-                  <br/>
-                  Please try again.
-                </p>
-                 <Button onClick={reset} variant="outline" className="w-full max-w-xs mt-6 transition-colors duration-300" aria-label="Start Over">
-                  <RotateCcw className="mr-2 h-5 w-5" /> Start Over
-                </Button>
-              </div>
-            )}
-          </div>
-      )}
-      
-      {step === 'frame-selection' && (
-        <>
-          <header className="fixed top-0 left-0 right-0 z-50 flex items-center p-4 bg-black/50 backdrop-blur-sm">
-            <Link href="/" passHref>
-              <Button variant="ghost" size="icon" className="mr-2 text-white hover:bg-white/20">
-                <ArrowLeft className="h-6 w-6" />
-              </Button>
-            </Link>
-            <h1 className="text-xl font-semibold">Choose your frame</h1>
-          </header>
-
-          <main className="p-4 pt-20">
-            <div className="grid grid-cols-2 gap-2">
-              {TEMPLATES.map((item, index) => (
-                <div
-                  key={index}
-                  className="aspect-[9/16] rounded-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02] active:scale-95 shadow-md border border-gray-700"
-                  onClick={() => handleFrameSelect(index)}
-                >
-                  <Image
-                    src={item.template}
-                    alt={`Template ${index + 1}`}
-                    width={180}
-                    height={320}
-                    className="w-full h-full object-cover"
-                    data-ai-hint={item.hint}
-                  />
-                </div>
-              ))}
+        <div className="relative w-full h-dvh animate-fade-in bg-black">
+          {isProcessing && (
+            <div className="flex flex-col items-center justify-center h-full text-white">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-3"></div>
+              <p className="text-muted-foreground">Processing your image...</p>
             </div>
-          </main>
+          )}
 
-          <div className={cn(
-            "fixed inset-0 z-[60] flex items-center justify-center transition-all duration-300",
-            isFrameExpanded ? "opacity-100 bg-black/80 backdrop-blur-sm" : "opacity-0 pointer-events-none"
-          )}>
-            <div 
-                className={cn(
-                    "relative transition-all duration-300 ease-out",
-                    isFrameExpanded ? "scale-100 opacity-100" : "scale-95 opacity-0"
-                )}
-                style={{ width: `${CANVAS_WIDTH}px`, height: `${CANVAS_HEIGHT}px` }}
-            >
-                {selectedFrameIndex !== null && (
-                    <Image
-                        src={TEMPLATES[selectedFrameIndex].template}
-                        alt="Selected Template"
-                        fill
-                        className="object-contain pointer-events-none rounded-lg"
-                        priority
-                    />
-                )}
+          {!isProcessing && processedImageSrc && (
+            <>
+              <Image
+                src={processedImageSrc}
+                alt="Your final snap"
+                fill
+                className="object-contain"
+                onError={handleImageError}
+                priority
+              />
+              <div className="fixed pb-6 px-4 bottom-0 left-0 right-0 z-20 pointer-events-none bg-gradient-to-t from-black/90 to-transparent"></div>
+              <div className="fixed bottom-6 left-0 right-4 z-20 flex flex-row-reverse items-center gap-3">
                 <Button
-                  onClick={handleCloseExpandedFrame}
+                  onClick={handleShare}
+                  className="relative z-50 h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-accent border border-accent text-primary-foreground shadow-md transition-transform transform hover:scale-105 hover:bg-accent/90 [&_svg]:size-6 hover:text-white"
+                  aria-label="Share Image"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram-icon lucide-instagram w-10 h-10"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
+                </Button>
+                <Button
+                  onClick={handleDownload}
                   variant="ghost"
                   size="icon"
-                  className="absolute top-2 right-2 z-10 h-10 w-10 rounded-full bg-black/40 text-white hover:bg-black/60"
-                  aria-label="Close"
+                  className="relative z-50 h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white"
+                  aria-label="Download Image"
                 >
-                  <X className="h-6 w-6" />
+                  <Download className="h-6 w-6" />
                 </Button>
+                <Button
+                  onClick={resetCamera}
+                  variant="ghost"
+                  size="icon"
+                  className="relative z-50 h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white"
+                  aria-label="Start Over"
+                >
+                  <RotateCcw className="h-6 w-6" />
+                </Button>
+              </div>
+            </>
+          )}
 
-                <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-4 px-4 z-10">
-                    <Button onClick={startCamera} size="lg" className="w-full py-4 text-base bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                        <Camera className="mr-2 h-5 w-5" /> Use Camera
-                    </Button>              
-                    <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-4 text-base bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
-                        <UploadCloud className="mr-2 h-5 w-5" /> Upload Photo
-                    </Button>
-                    <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
+          {!isProcessing && !processedImageSrc && userImageSrc && (
+            <div className="flex flex-col items-center justify-center h-full text-white p-4 text-center">
+              <AlertTriangle className="h-12 w-12 text-destructive mb-3" />
+              <p className="text-muted-foreground">
+                There was an issue applying the frame.
+                <br />
+                Please try again.
+              </p>
+              <Button onClick={reset} variant="outline" className="w-full max-w-xs mt-6 transition-colors duration-300" aria-label="Start Over">
+                <RotateCcw className="mr-2 h-5 w-5" /> Start Over
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {step === 'frame-selection' && (
+        <>
+          <div className="h-dvh relative overflow-hidden">
+            <header className="fixed top-0 left-0 right-0 z-50 flex items-center p-4 bg-black/50 backdrop-blur-sm">
+              <Link href="/" passHref>
+                <Button variant="ghost" size="icon" className="mr-2 text-white hover:bg-white/20">
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+              </Link>
+              <h1 className="text-xl font-semibold">Choose your frame</h1>
+            </header>
+
+            <main className="p-4 pt-[72px]">
+              <div className="grid grid-cols-2 gap-2">
+                {TEMPLATES.map((item, index) => (
+                  <div
+                    key={index}
+                    className="relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02] active:scale-95 shadow-md border border-gray-700"
+                    onClick={() => handleFrameSelect(index)}
+                  >
+                    {!loadedImages[index] && (
+                      <Skeleton className="absolute top-0 left-0 w-full h-full" />
+                    )}
+                    <Image
+                      src={item.template}
+                      alt={`Template ${index + 1}`}
+                      width={180}
+                      height={320}
+                      className={cn(
+                        "w-full h-full object-cover transition-opacity duration-300",
+                        loadedImages[index] ? "opacity-100" : "opacity-0"
+                      )}
+                      onLoad={() => handleImageLoad(index)}
+                      data-ai-hint={item.hint}
+                    />
+                  </div>
+                ))}
+              </div>
+            </main>
+
+            <div className={cn(
+              "fixed inset-0 z-[60] flex items-center justify-center transition-all duration-500",
+              isFrameExpanded ? "opacity-100 bg-black backdrop-blur-sm" : "opacity-0 pointer-events-none"
+            )}>
+              <div
+                className="relative w-full h-full">
+                <header className="fixed top-0 left-0 right-0 z-50 flex items-center p-4 bg-black/50 backdrop-blur-sm">
+                  <Button variant="ghost" size="icon" className="mr-2 text-white hover:bg-white/20" onClick={handleCloseExpandedFrame}>
+                    <ArrowLeft className="h-6 w-6" />
+                  </Button>
+                  <h1 className="text-xl font-semibold">Capture Your Photo</h1>
+                </header>
+                <div className="pt-[72px] pb-24 w-full h-full flex justify-center">
+                  {selectedFrameIndex !== null && (
+                    <div className={cn("relative border-2 border-white rounded-lg overflow-clip h-full w-auto transition-all duration-300 ease-out",
+                      isFrameExpanded ? "scale-100 opacity-100" : "scale-75 opacity-0")}>
+                      {!loadedImages[selectedFrameIndex] && (
+                        <Skeleton className="absolute top-0 left-0 w-full h-full" />
+                      )}
+                      <Image
+                        src={TEMPLATES[selectedFrameIndex].template}
+                        alt="Selected Template"
+                        width={1080}
+                        height={1920}
+                        className={cn(
+                          "object-contain pointer-events-none w-full h-full",
+                          loadedImages[selectedFrameIndex] ? "opacity-100" : "opacity-0"
+                        )}
+                        priority
+                        onLoad={() => handleImageLoad(selectedFrameIndex)}
+                      />
+                    </div>
+                  )}
                 </div>
+
+                <div className={cn("absolute bottom-8 left-0 right-0 flex items-center justify-center gap-4 px-4 z-10 transition-all duration-500 delay-500",
+                  isFrameExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                )}>
+                  <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
+                    <UploadCloud className="mr-1 h-6 w-6" /> Upload Photo
+                  </Button>
+                  <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
+                  <Button onClick={startCamera} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                    <Camera className="mr-1 h-6 w-6" /> Use Camera
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </>
