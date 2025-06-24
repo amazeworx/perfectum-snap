@@ -3,48 +3,74 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, Camera, Share2, Download, RotateCcw, AlertTriangle, ArrowLeft, SwitchCamera } from 'lucide-react';
+import { UploadCloud, Camera, Share2, Download, RotateCcw, AlertTriangle, ArrowLeft, SwitchCamera, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { ViewMode } from '@/app/page';
 
-const FRAME_IMAGE_URL = '/images/perfectum-frame.png';
 const CANVAS_WIDTH = 360;
 const CANVAS_HEIGHT = 640;
+const FRAMES = Array(4).fill('/images/perfectum-frame.png'); // Placeholder for 4 frames
 
-type Step = 'initial' | 'camera' | 'preview';
+type Step = 'frame-selection' | 'camera' | 'preview';
 
-export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (isActive: boolean) => void }) {
-  const [step, setStep] = useState<Step>('initial');
+interface PhotoProcessorProps {
+  onViewModeChange: (mode: ViewMode) => void;
+}
+
+export default function PhotoProcessor({ onViewModeChange }: PhotoProcessorProps) {
+  const [step, setStep] = useState<Step>('frame-selection');
   const [userImageSrc, setUserImageSrc] = useState<string | null>(null);
   const [processedImageSrc, setProcessedImageSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [frameImage, setFrameImage] = useState<HTMLImageElement | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
-  
+
+  const [selectedFrameIndex, setSelectedFrameIndex] = useState<number | null>(null);
+  const [isFrameExpanded, setIsFrameExpanded] = useState(false);
+  const [selectedFrameUrl, setSelectedFrameUrl] = useState<string>('');
+  const [frameImage, setFrameImage] = useState<HTMLImageElement | null>(null);
+
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null); // For processing
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
 
   useEffect(() => {
-    // Preload the frame image
+    const isFullscreen = isFrameExpanded || step === 'camera' || step === 'preview';
+    onViewModeChange(isFullscreen ? 'fullscreen' : 'home');
+  }, [isFrameExpanded, step, onViewModeChange]);
+
+  useEffect(() => {
+    if (!selectedFrameUrl) {
+      setFrameImage(null);
+      return;
+    }
+
     const img = new window.Image();
     img.crossOrigin = 'anonymous';
-    img.src = FRAME_IMAGE_URL;
-    img.onload = () => {
-      setFrameImage(img);
-    };
+    img.src = selectedFrameUrl;
+    img.onload = () => setFrameImage(img);
     img.onerror = () => {
       toast({
         title: 'Error',
-        description: 'Failed to load the frame image. Please try refreshing the page.',
+        description: `Failed to load frame: ${selectedFrameUrl}`,
         variant: 'destructive',
       });
     };
-  }, [toast]);
+  }, [selectedFrameUrl, toast]);
+
+  const handleFrameSelect = (index: number) => {
+    setSelectedFrameIndex(index);
+    setSelectedFrameUrl(FRAMES[index]);
+    setIsFrameExpanded(true);
+  };
+  
+  const handleCloseExpandedFrame = () => {
+    setIsFrameExpanded(false);
+  };
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = `https://placehold.co/${CANVAS_WIDTH}x${CANVAS_HEIGHT}.png`;
@@ -65,9 +91,8 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
     }
 
     setIsProcessing(true);
-    setProcessedImageSrc(null); // Clear previous processed image
+    setProcessedImageSrc(null);
 
-    // Use a timeout to allow the UI to update to the loading state before the canvas operation
     setTimeout(() => {
         const canvas = canvasRef.current;
         const ctx = canvas?.getContext('2d');
@@ -85,7 +110,6 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
         userImg.src = userImageSrc;
 
         userImg.onload = () => {
-          // Calculate scaling to cover canvas while maintaining aspect ratio
           const hRatio = CANVAS_WIDTH / userImg.width;
           const vRatio = CANVAS_HEIGHT / userImg.height;
           const ratio = Math.max(hRatio, vRatio);
@@ -93,10 +117,8 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
           const centerShift_y = (CANVAS_HEIGHT - userImg.height * ratio) / 2;
 
           ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-          // Draw user image (scaled and centered)
           ctx.drawImage(userImg, 0, 0, userImg.width, userImg.height, centerShift_x, centerShift_y, userImg.width * ratio, userImg.height * ratio);
           
-          // Draw frame image on top
           ctx.drawImage(frameImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
           
           setProcessedImageSrc(canvas.toDataURL('image/png'));
@@ -121,11 +143,11 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      onCameraToggle(true);
       const reader = new FileReader();
       reader.onload = (e) => {
         setUserImageSrc(e.target?.result as string);
         setStep('preview');
+        handleCloseExpandedFrame();
       };
       reader.readAsDataURL(file);
     }
@@ -147,36 +169,25 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-    setStep('initial');
-    onCameraToggle(false);
-  }, [stopCamera, onCameraToggle]);
+    setStep('frame-selection');
+    setSelectedFrameIndex(null);
+    setIsFrameExpanded(false);
+    setSelectedFrameUrl('');
+    setFrameImage(null);
+  }, [stopCamera]);
 
   useEffect(() => {
     const enableCamera = async (mode: 'user' | 'environment') => {
-      // stopCamera is called by the cleanup function of this effect when dependencies change.
       try {
-        const constraints = { 
-          video: { 
-            width: { ideal: 1280 }, 
-            height: { ideal: 720 }, 
-            facingMode: { exact: mode } 
-          } 
-        };
+        const constraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { exact: mode } } };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
       } catch (err) {
         console.warn("Exact facing mode failed, falling back.", err);
-        // Fallback for browsers that don't support 'exact' or if the camera is not available.
         try {
-            const fallbackConstraints = { 
-                video: { 
-                    width: { ideal: 1280 }, 
-                    height: { ideal: 720 }, 
-                    facingMode: mode
-                } 
-            };
+            const fallbackConstraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: mode } };
             const stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
@@ -196,7 +207,6 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       enableCamera(facingMode);
     }
 
-    // Cleanup function: stop the camera when the step changes or component unmounts.
     return () => {
         stopCamera();
     }
@@ -205,7 +215,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
 
   const startCamera = () => {
     setStep('camera');
-    onCameraToggle(true);
+    handleCloseExpandedFrame();
   };
 
   const toggleCameraFacingMode = useCallback(() => {
@@ -220,7 +230,6 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       tempCanvas.height = video.videoHeight;
       const ctx = tempCanvas.getContext('2d');
       if (ctx) {
-        // Flip the image horizontally only if it's the front camera to correct the mirror effect
         if (facingMode === 'user') {
           ctx.translate(video.videoWidth, 0);
           ctx.scale(-1, 1);
@@ -229,7 +238,6 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
       }
       setUserImageSrc(tempCanvas.toDataURL('image/png'));
       setStep('preview');
-      onCameraToggle(true); // Keep the header hidden
     }
   };
 
@@ -282,14 +290,16 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
             )} 
             aria-label="Camera feed">
           </video>
-          <Image
-            src={FRAME_IMAGE_URL}
-            alt="Frame Overlay"
-            fill
-            style={{ objectFit: 'contain' }}
-            className="pointer-events-none z-10"
-            priority
-          />
+          {frameImage && (
+            <Image
+              src={frameImage.src}
+              alt="Frame Overlay"
+              fill
+              style={{ objectFit: 'contain' }}
+              className="pointer-events-none z-10"
+              priority
+            />
+          )}
         </div>
         <Button
           onClick={reset}
@@ -325,34 +335,11 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
     );
   }
 
-  return (
-    <Card className={cn(
-      "w-full",
-      step === 'initial'
-        ? "shadow-xl rounded-lg overflow-hidden bg-card"
-        : "w-full h-dvh flex-grow shadow-none rounded-none border-none bg-black flex flex-col"
-    )}>
-      <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-
-      {step === 'initial' && (
-        <CardContent className="p-6 space-y-6">
-          <div className="animate-fade-in space-y-4">
-            <p className="text-center text-muted-foreground">Choose how to add your photo:</p>
-            <Button onClick={startCamera} size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 transform hover:shadow-lg hover:-translate-y-[2px] py-4 text-sm" aria-label="Use Camera">
-              <Camera className="mr-1.5 h-8 w-8" /> Use Camera
-            </Button>              
-            <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full bg-white hover:bg-white text-primary hover:text-primary border border-primary transition-all duration-300 transform hover:shadow-lg hover:-translate-y-[2px] py-4 text-sm" aria-label="Upload a Photo">
-              <UploadCloud className="mr-1.5 h-10 w-10" /> Upload a Photo
-            </Button>
-            <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
-          </div>
-        </CardContent>
-      )}
-
-      {step === 'preview' && (
-        <div className="relative w-full h-dvh animate-fade-in">
+  if (step === 'preview') {
+    return (
+        <div className="relative w-full h-dvh animate-fade-in bg-black">
           {isProcessing && (
-            <div className="flex flex-col items-center justify-center h-full text-white bg-black">
+            <div className="flex flex-col items-center justify-center h-full text-white">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-3"></div>
               <p className="text-muted-foreground">Processing your image...</p>
             </div>
@@ -399,7 +386,7 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
           )}
 
           {!isProcessing && !processedImageSrc && userImageSrc && (
-            <div className="flex flex-col items-center justify-center h-full bg-black text-white p-4 text-center">
+            <div className="flex flex-col items-center justify-center h-full text-white p-4 text-center">
               <AlertTriangle className="h-12 w-12 text-destructive mb-3" />
               <p className="text-muted-foreground">
                 There was an issue applying the frame.
@@ -412,7 +399,81 @@ export default function PhotoProcessor({ onCameraToggle }: { onCameraToggle: (is
             </div>
           )}
         </div>
-      )}
-    </Card>
+      );
+  }
+
+  return (
+    <>
+      <Card className="w-full shadow-xl rounded-lg overflow-hidden bg-card animate-fade-in">
+        <CardHeader>
+          <CardTitle className="text-center text-xl font-semibold">Choose your frame</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid grid-cols-2 gap-4">
+            {FRAMES.map((frameSrc, index) => (
+              <div
+                key={index}
+                className="aspect-[9/16] rounded-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95 shadow-md border"
+                onClick={() => handleFrameSelect(index)}
+                data-ai-hint="photo frame"
+              >
+                <Image
+                  src={frameSrc}
+                  alt={`Frame ${index + 1}`}
+                  width={180}
+                  height={320}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className={cn(
+        "fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300",
+        isFrameExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
+      )}>
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={handleCloseExpandedFrame} />
+        
+        <div 
+            className={cn(
+                "relative transition-all duration-300 ease-out",
+                isFrameExpanded ? "scale-100 opacity-100" : "scale-95 opacity-0"
+            )}
+            style={{ width: `${CANVAS_WIDTH}px`, height: `${CANVAS_HEIGHT}px` }}
+        >
+            {selectedFrameUrl && (
+                <Image
+                    src={selectedFrameUrl}
+                    alt="Selected Frame"
+                    fill
+                    className="object-contain pointer-events-none"
+                    priority
+                />
+            )}
+            <Button
+              onClick={handleCloseExpandedFrame}
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-10 h-10 w-10 rounded-full bg-black/40 text-white hover:bg-black/60"
+              aria-label="Close"
+            >
+              <X className="h-6 w-6" />
+            </Button>
+
+            <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center gap-4 px-4 z-10">
+                <Button onClick={startCamera} size="lg" className="w-full py-6 text-base bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                    <Camera className="mr-2 h-6 w-6" /> Use Camera
+                </Button>              
+                <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-6 text-base bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
+                    <UploadCloud className="mr-2 h-6 w-6" /> Upload a Photo
+                </Button>
+                <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
+            </div>
+        </div>
+      </div>
+      <canvas ref={canvasRef} className="hidden"></canvas>
+    </>
   );
 }

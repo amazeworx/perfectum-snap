@@ -5,15 +5,17 @@ import Image from 'next/image';
 import PhotoProcessor from '@/components/PhotoProcessor';
 import { cn } from '@/lib/utils';
 
+export type ViewMode = 'home' | 'fullscreen';
+
 export default function HomePage() {
-  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('home');
 
   return (
     <div className={cn(
         "flex flex-col min-h-dvh bg-background text-foreground",
-        !isCameraActive && "items-center p-4 sm:p-6 md:p-8"
+        viewMode === 'home' && "items-center p-4 sm:p-6 md:p-8"
     )}>
-      {!isCameraActive && (
+      {viewMode === 'home' && (
         <header className="flex flex-col items-center text-center mb-8 pt-8 w-full max-w-2xl">
           <Image 
             src="/images/perfectum-icon.png" 
@@ -33,9 +35,9 @@ export default function HomePage() {
       )}
       <main className={cn(
           "w-full flex-grow flex flex-col",
-          !isCameraActive && "max-w-2xl"
+          viewMode === 'home' && "max-w-2xl"
       )}>
-        <PhotoProcessor onCameraToggle={setIsCameraActive} />
+        <PhotoProcessor onViewModeChange={setViewMode} />
       </main>
     </div>
   );
