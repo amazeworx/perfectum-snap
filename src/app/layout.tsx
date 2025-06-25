@@ -51,7 +51,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-body antialiased bg-slate-800">
+      <body className="font-body antialiased bg-black">
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-MZXS39BX"
