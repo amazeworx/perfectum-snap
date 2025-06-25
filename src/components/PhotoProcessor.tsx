@@ -335,9 +335,13 @@ export default function PhotoProcessor() {
 
   const handleDownload = () => {
     if (processedImageSrc) {
+      const timestamp = Date.now();
+
+      const filename = `bni_x_perfectum_x_ootb-${timestamp}.png`;
+
       const link = document.createElement('a');
       link.href = processedImageSrc;
-      link.download = 'bni_x_perfectum_x_ootb.png';
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
