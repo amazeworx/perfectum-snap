@@ -10,8 +10,8 @@ import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 export default function HomePage() {
 
   return (
-    <div className="max-w-screen-sm mx-auto">
-      <div className="relative flex flex-col min-h-dvh bg-slate-50 text-muted-foreground p-4">
+    <div className="max-w-screen-sm mx-auto overflow-hidden">
+      <div className="relative flex flex-col min-h-dvh bg-white text-muted-foreground p-4">
         <header className="mt-12 mb-12 flex space-x-4 items-end relative z-10">
           <div>
             <Image
