@@ -111,6 +111,41 @@ export default function PhotoProcessor() {
     });
   };
 
+  // --- MODIFICATION 1: Converted handleSaveToServer to a useCallback ---
+  const handleSaveToServer = useCallback(async (imageToSave: string) => {
+    if (!imageToSave) {
+      // This case should ideally not be hit if called correctly
+      return;
+    }
+    try {
+      // The URL to your PHP script on cPanel
+      const response = await fetch('https://perfectum.amazeworx.com/upload.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: imageToSave }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        //console.log('Image auto-saved to server:', result.url);
+        // We can silence the success toast to make it a true background task
+      } else {
+        // throw new Error(result.error || 'Failed to save image.');
+      }
+    } catch (error) {
+      // console.error('Auto-save error:', error);
+      // Optionally notify user of background save failure
+      // toast({
+      //   title: "Background Save Failed",
+      //   description: "Your image could not be saved to the gallery.",
+      //   variant: "destructive",
+      // });
+    }
+  }, []); // Empty dependency array as it has no external dependencies
+
   const processImage = useCallback(async () => {
     if (!userImageSrc || !frameImage) {
       if (!frameImage) {
@@ -122,6 +157,7 @@ export default function PhotoProcessor() {
     setIsProcessing(true);
     setProcessedImageSrc(null);
 
+    // Use a small timeout to allow UI to update to "processing" state
     setTimeout(() => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d');
@@ -150,8 +186,12 @@ export default function PhotoProcessor() {
 
         ctx.drawImage(frameImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+        const finalImageSrc = canvas.toDataURL('image/png');
         setProcessedImageSrc(canvas.toDataURL('image/png'));
         setIsProcessing(false);
+
+        // --- MODIFICATION 2: Automatically call the save function ---
+        handleSaveToServer(finalImageSrc);
 
         if (typeof window !== "undefined" && window.dataLayer && selectedFrameIndex !== null) {
           window.dataLayer.push({
@@ -168,7 +208,7 @@ export default function PhotoProcessor() {
       };
     }, 50);
 
-  }, [userImageSrc, frameImage, toast]);
+  }, [userImageSrc, frameImage, handleSaveToServer, toast, selectedFrameIndex]);
 
   useEffect(() => {
     if (userImageSrc && frameImage && step === 'preview') {
@@ -228,7 +268,7 @@ export default function PhotoProcessor() {
   useEffect(() => {
     const enableCamera = async (mode: 'user' | 'environment') => {
       try {
-        const constraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { exact: mode } } };
+        const constraints = { video: { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: { exact: mode } } };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -236,7 +276,7 @@ export default function PhotoProcessor() {
       } catch (err) {
         console.warn("Exact facing mode failed, falling back.", err);
         try {
-          const fallbackConstraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: mode } };
+          const fallbackConstraints = { video: { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: mode } };
           const stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
