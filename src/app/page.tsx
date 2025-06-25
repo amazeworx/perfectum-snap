@@ -60,7 +60,7 @@ export default function HomePage() {
               alt="Perfectum"
               width={290}
               height={390}
-              className="h-16 w-auto"
+              className="h-[72px] w-auto"
               data-ai-hint="logo perfectum"
             />
             <Image
@@ -68,12 +68,12 @@ export default function HomePage() {
               alt="OOTB"
               width={290}
               height={390}
-              className="h-16 w-auto"
+              className="h-[72px] w-auto"
               data-ai-hint="logo ootb"
             />
           </div>
         </div>
-        <div className="text-center border-t py-2 bg-slate-200"><span className='text-xs font-semibold'><em>Don't forget to follow and tag our Instagram</em></span> <span>👌</span></div>
+        <div className="text-center border-t py-2 bg-slate-200"><span className='text-xs font-semibold'><em>Don't forget to follow and tag our Instagram</em></span> <span className='text-xl'>👌</span></div>
       </div>
       <AnimatedGridPattern
         width={40}
@@ -82,12 +82,12 @@ export default function HomePage() {
         y={-1}
         strokeDasharray={5}
         numSquares={40}
-        maxOpacity={0.2}
+        maxOpacity={0.3}
         duration={4}
-        repeatDelay={0.5}
+        repeatDelay={0.8}
         className={cn(
-          "[mask-image:radial-gradient(420px_circle_at_center,white,transparent)]",
-          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12 stroke-slate-500/30 fill-slate-400/30 animate-fade animate-once animate-duration-1000 animate-delay-0 animate-ease-in-out",
+          "[mask-image:radial-gradient(600px_circle_at_center,white,transparent)]",
+          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12 stroke-slate-500/30 fill-slate-400/70 text-accent animate-fade animate-once animate-duration-1000 animate-delay-0 animate-ease-in-out",
         )}
       />
     </div>

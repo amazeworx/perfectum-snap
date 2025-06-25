@@ -60,7 +60,7 @@ export default function RootLayout({
             style={{ display: 'none', visibility: 'hidden' }}
           ></iframe>
         </noscript>
-        <div className="relative max-w-screen-sm mx-auto overflow-hidden">
+        <div className="relative max-w-[480px] mx-auto overflow-hidden">
           {children}
         </div>
         <Toaster />

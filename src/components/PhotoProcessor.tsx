@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, Camera, Share2, Download, RotateCcw, AlertTriangle, ArrowLeft, SwitchCamera, X } from 'lucide-react';
+import { UploadCloud, Camera, Share2, Download, RotateCcw, AlertTriangle, ArrowLeft, RefreshCw, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CANVAS_WIDTH = 360;
@@ -411,7 +411,7 @@ export default function PhotoProcessor() {
                 onClick={reset}
                 variant="ghost"
                 size="icon"
-                className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                className="h-12 w-12 rounded-full bg-black/50 text-white hover:text-white active:text-white hover:bg-black/70 active:bg-black [&_svg]:size-5"
                 aria-label="Go Back"
               >
                 <ArrowLeft className="h-6 w-6" />
@@ -422,7 +422,7 @@ export default function PhotoProcessor() {
                 <div className="w-12 h-12" />
                 <Button
                   onClick={capturePhoto}
-                  className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-accent hover:bg-primary/80 border-2 border-white ring-2 ring-primary/20 text-white shadow-lg flex items-center justify-center [&_svg]:size-6"
+                  className="w-[72px] h-[72px] rounded-full bg-gradient-to-tr from-primary to-accent hover:bg-primary/80 border-2 border-white ring-2 ring-primary/20 text-white shadow-lg flex items-center justify-center [&_svg]:size-6"
                   size="icon"
                   aria-label="Capture Photo"
                 >
@@ -432,10 +432,10 @@ export default function PhotoProcessor() {
                   onClick={toggleCameraFacingMode}
                   variant="ghost"
                   size="icon"
-                  className="w-12 h-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                  className="w-12 h-12 rounded-full bg-black/50 text-white hover:text-white active:text-white hover:bg-black/70 active:bg-black"
                   aria-label="Switch Camera"
                 >
-                  <SwitchCamera className="h-6 w-6" />
+                  <RefreshCw className="h-6 w-6" />
                 </Button>
               </div>
             </div>
@@ -462,35 +462,48 @@ export default function PhotoProcessor() {
                 onError={handleImageError}
                 priority
               />
-              <div className="absolute bottom-0 pb-6 left-0 px-4 right-0 z-20 flex flex-row-reverse items-center gap-3 bg-gradient-to-t from-black/90 to-transparent">
+              <div className="absolute pb-6 top-0 left-0 right-0 p-4 flex z-20 bg-gradient-to-b from-black/90 to-transparent">
+                <Button
+                  onClick={reset}
+                  variant="ghost"
+                  size="icon"
+                  className="h-12 w-12 rounded-full bg-black/50 text-white hover:text-white active:text-white hover:bg-black/70 active:bg-black [&_svg]:size-5"
+                  aria-label="Go Back"
+                >
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+              </div>
+              <div className="absolute bottom-0 pb-6 left-0 px-4 right-0 z-20 flex flex-row-reverse items-center gap-6 bg-gradient-to-t from-black/90 to-transparent">
                 <div className="relative">
                   <Button
                     onClick={handleShare}
-                    className="relative z-50 h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-accent border border-accent text-primary-foreground shadow-md transition-transform transform hover:scale-105 hover:bg-accent/90 [&_svg]:size-6 hover:text-white"
+                    className="relative z-50 h-16 w-16 rounded-full bg-gradient-to-tr from-primary to-accent border border-accent text-primary-foreground shadow-md transition-transform transform hover:scale-105 hover:bg-accent/90 [&_svg]:size-6 hover:text-white"
                     aria-label="Share Image"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram-icon lucide-instagram w-10 h-10"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
                   </Button>
-                  <div className="absolute h-14 w-14 inset-0 bg-accent opacity-75 rounded-full animate-ping"></div>
+                  <div className="absolute h-16 w-16 inset-0 bg-accent opacity-75 rounded-full animate-ping"></div>
                 </div>
-                <Button
-                  onClick={handleDownload}
-                  variant="ghost"
-                  size="icon"
-                  className="relative z-50 h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white"
-                  aria-label="Download Image"
-                >
-                  <Download className="h-6 w-6" />
-                </Button>
-                <Button
-                  onClick={resetCamera}
-                  variant="ghost"
-                  size="icon"
-                  className="relative z-50 h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white"
-                  aria-label="Start Over"
-                >
-                  <RotateCcw className="h-6 w-6" />
-                </Button>
+                <div className="flex flex-row-reverse gap-x-2 items-center">
+                  <Button
+                    onClick={handleDownload}
+                    variant="ghost"
+                    size="icon"
+                    className="relative z-50 h-10 w-10 rounded-full bg-black/50 text-white hover:text-white hover:bg-black/70 active:bg-black active:text-white"
+                    aria-label="Download Image"
+                  >
+                    <Download className="h-6 w-6" />
+                  </Button>
+                  <Button
+                    onClick={resetCamera}
+                    variant="ghost"
+                    size="icon"
+                    className="relative z-50 h-10 w-10 rounded-full bg-black/50 text-white hover:text-white hover:bg-black/70 active:bg-black active:text-white"
+                    aria-label="Start Over"
+                  >
+                    <RotateCcw className="h-6 w-6" />
+                  </Button>
+                </div>
               </div>
             </>
           )}
