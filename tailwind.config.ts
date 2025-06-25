@@ -151,18 +151,32 @@ export default {
 						opacity: '0'
 					}
 				},
+				// 'bounce-slow': {
+				// 	'0%': {
+				// 		transform: 'translateY(1px)',
+				// 		'animation-timing-function': 'cubic-bezier(0.8, 0, 1, 1)'
+				// 	},
+				// 	'50%': {
+				// 		transform: 'translateY(-5px)',
+				// 		'animation-timing-function': 'cubic-bezier(0, 0, 0.2, 1)',
+				// 	},
+				// 	'100%': {
+				// 		transform: 'translateY(1px)',
+				// 		'animation-timing-function': 'cubic-bezier(0.8, 0, 1, 1)'
+				// 	},
+				// },
 				'bounce-slow': {
 					'0%': {
 						transform: 'translateY(1px)',
-						'animation-timing-function': 'cubic-bezier(0.8, 0, 1, 1)'
+						//'animation-timing-function': 'cubic-bezier(0.8, 0, 1, 1)'
 					},
 					'50%': {
 						transform: 'translateY(-5px)',
-						'animation-timing-function': 'cubic-bezier(0, 0, 0.2, 1)',
+						//'animation-timing-function': 'cubic-bezier(0, 0, 0.2, 1)',
 					},
 					'100%': {
 						transform: 'translateY(1px)',
-						'animation-timing-function': 'cubic-bezier(0.8, 0, 1, 1)'
+						//'animation-timing-function': 'cubic-bezier(0.8, 0, 1, 1)'
 					},
 				},
 				aurora: {
@@ -173,6 +187,16 @@ export default {
 						backgroundPosition: "350% 50%, 350% 50%",
 					},
 				},
+				ping: {
+					'75%': {
+						transform: 'scale(1.5)',
+						opacity: '0',
+					},
+					'100%': {
+						transform: 'scale(1.5)',
+						opacity: '0',
+					}
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -182,8 +206,10 @@ export default {
 				'slide-in-from-right': 'slide-in-from-right 0.3s ease-out',
 				'star-movement-bottom': 'star-movement-bottom linear infinite alternate',
 				'star-movement-top': 'star-movement-top linear infinite alternate',
-				'bounce-slow': '2s ease 0s infinite normal none running bounce-slow',
+				//'bounce-slow': '2s ease 0s infinite normal none running bounce-slow',
+				'bounce-slow': 'bounce-slow 2s ease-in-out infinite',
 				'aurora': "aurora 60s linear infinite",
+				'ping': "ping 1s cubic-bezier(0, 0, 0.2, 1) infinite",
 			},
 		}
 	},

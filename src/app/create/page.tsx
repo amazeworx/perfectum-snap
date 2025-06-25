@@ -13,7 +13,7 @@ export default function CreatePage() {
 
   return (
     <div className={cn(
-      "min-h-dvh bg-black text-white transition-opacity duration-500",
+      "relative min-h-dvh bg-black text-white transition-opacity duration-500",
       isMounted ? 'opacity-100' : 'opacity-0'
     )}>
       <PhotoProcessor />

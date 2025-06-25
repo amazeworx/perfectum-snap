@@ -336,61 +336,64 @@ export default function PhotoProcessor() {
   return (
     <>
       {step === 'camera' && (
-        <div className="fixed inset-0 bg-black">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className={cn(
-              "w-full h-full object-cover",
-              facingMode === 'user' && "scale-x-[-1]"
+        <div className="aspect-[9/16] mx-auto h-dvh">
+          <div className="mx-auto">
+            <div className="aspect-[9/16]">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className={cn(
+                  "w-full h-full object-cover",
+                  facingMode === 'user' && "scale-x-[-1]"
+                )}
+                aria-label="Camera feed">
+              </video>
+            </div>
+            <div className="bg-black absolute inset-0 [mask-image:linear-gradient(black,black),url('/images/template-1.jpg')] [mask-composite:subtract] [mask-size:contain,contain] [mask-position:center,center] [mask-repeat:no-repeat,no-repeat]"></div>
+            {frameImage && (
+              <Image
+                src={frameImage.src}
+                alt="Frame Overlay"
+                fill
+                style={{ objectFit: 'contain' }}
+                className="pointer-events-none z-10"
+                priority
+              />
             )}
-            aria-label="Camera feed">
-          </video>
-          {frameImage && (
-            <Image
-              src={frameImage.src}
-              alt="Frame Overlay"
-              fill
-              style={{ objectFit: 'contain' }}
-              className="pointer-events-none z-10"
-              priority
-            />
-          )}
-          <div className="fixed pb-6 top-0 left-0 right-0 p-4 flex z-20 bg-gradient-to-b from-black/90 to-transparent">
-            <Button
-              onClick={reset}
-              variant="ghost"
-              size="icon"
-              className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
-              aria-label="Go Back"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </Button>
-          </div>
-          <div className="fixed h-24 bottom-0 left-0 right-0 z-20 pointer-events-none bg-gradient-to-t from-black/90 to-transparent">
-          </div>
-          <div className="fixed bottom-6 left-0 right-0 flex justify-center z-20">
-            <div className="flex items-center gap-x-16 pointer-events-auto">
-              <div className="w-12 h-12" />
+            <div className="absolute pb-6 top-0 left-0 right-0 p-4 flex z-20 bg-gradient-to-b from-black/90 to-transparent">
               <Button
-                onClick={capturePhoto}
-                className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-accent hover:bg-primary/80 border-2 border-white ring-2 ring-primary/20 text-white shadow-lg flex items-center justify-center [&_svg]:size-6"
-                size="icon"
-                aria-label="Capture Photo"
-              >
-                <Camera className="h-16 w-16" />
-              </Button>
-              <Button
-                onClick={toggleCameraFacingMode}
+                onClick={reset}
                 variant="ghost"
                 size="icon"
-                className="w-12 h-12 rounded-full bg-black/50 text-white hover:bg-black/70"
-                aria-label="Switch Camera"
+                className="h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                aria-label="Go Back"
               >
-                <SwitchCamera className="h-6 w-6" />
+                <ArrowLeft className="h-6 w-6" />
               </Button>
+            </div>
+            <div className="absolute bottom-0 pb-6 left-0 right-0 flex justify-center z-20 bg-gradient-to-t from-black/90 to-transparent">
+              <div className="flex items-center gap-x-16 pointer-events-auto">
+                <div className="w-12 h-12" />
+                <Button
+                  onClick={capturePhoto}
+                  className="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-accent hover:bg-primary/80 border-2 border-white ring-2 ring-primary/20 text-white shadow-lg flex items-center justify-center [&_svg]:size-6"
+                  size="icon"
+                  aria-label="Capture Photo"
+                >
+                  <Camera className="h-16 w-16" />
+                </Button>
+                <Button
+                  onClick={toggleCameraFacingMode}
+                  variant="ghost"
+                  size="icon"
+                  className="w-12 h-12 rounded-full bg-black/50 text-white hover:bg-black/70"
+                  aria-label="Switch Camera"
+                >
+                  <SwitchCamera className="h-6 w-6" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -415,15 +418,17 @@ export default function PhotoProcessor() {
                 onError={handleImageError}
                 priority
               />
-              <div className="fixed pb-6 px-4 bottom-0 left-0 right-0 z-20 pointer-events-none bg-gradient-to-t from-black/90 to-transparent"></div>
-              <div className="fixed bottom-6 left-0 right-4 z-20 flex flex-row-reverse items-center gap-3">
-                <Button
-                  onClick={handleShare}
-                  className="relative z-50 h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-accent border border-accent text-primary-foreground shadow-md transition-transform transform hover:scale-105 hover:bg-accent/90 [&_svg]:size-6 hover:text-white"
-                  aria-label="Share Image"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram-icon lucide-instagram w-10 h-10"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
-                </Button>
+              <div className="absolute bottom-0 pb-6 left-0 px-4 right-0 z-20 flex flex-row-reverse items-center gap-3 bg-gradient-to-t from-black/90 to-transparent">
+                <div className="relative">
+                  <Button
+                    onClick={handleShare}
+                    className="relative z-50 h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-accent border border-accent text-primary-foreground shadow-md transition-transform transform hover:scale-105 hover:bg-accent/90 [&_svg]:size-6 hover:text-white"
+                    aria-label="Share Image"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram-icon lucide-instagram w-10 h-10"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg>
+                  </Button>
+                  <div className="absolute h-14 w-14 inset-0 bg-accent opacity-75 rounded-full animate-ping"></div>
+                </div>
                 <Button
                   onClick={handleDownload}
                   variant="ghost"
@@ -465,9 +470,9 @@ export default function PhotoProcessor() {
       {step === 'frame-selection' && (
         <>
           <div className="h-dvh relative overflow-hidden">
-            <header className="fixed top-0 left-0 right-0 z-50 flex items-center p-4 bg-black/50 backdrop-blur-sm">
+            <header className="absolute top-0 left-0 right-0 z-50 flex items-center p-4">
               <Link href="/" passHref>
-                <Button variant="ghost" size="icon" className="mr-2 text-white hover:bg-white/20">
+                <Button variant="ghost" size="icon" className="mr-2 text-white rounded-full hover:text-white active:text-white hover:bg-white/20 [&_svg]:size-5">
                   <ArrowLeft className="h-6 w-6" />
                 </Button>
               </Link>
@@ -503,51 +508,54 @@ export default function PhotoProcessor() {
             </main>
 
             <div className={cn(
-              "fixed inset-0 z-[60] flex items-center justify-center transition-all duration-500",
+              "absolute inset-0 z-[60] flex items-center justify-center transition-all duration-500",
               isFrameExpanded ? "opacity-100 bg-black backdrop-blur-sm" : "opacity-0 pointer-events-none"
             )}>
               <div
                 className="relative w-full h-full">
-                <header className="fixed top-0 left-0 right-0 z-50 flex items-center p-4 bg-black/50 backdrop-blur-sm">
-                  <Button variant="ghost" size="icon" className="mr-2 text-white hover:bg-white/20" onClick={handleCloseExpandedFrame}>
+                <header className="absolute top-0 left-0 right-0 z-50 flex items-center p-4">
+                  <Button variant="ghost" size="icon" className="mr-2 text-white rounded-full hover:text-white active:text-white hover:bg-white/20 [&_svg]:size-5" onClick={handleCloseExpandedFrame}>
                     <ArrowLeft className="h-6 w-6" />
                   </Button>
-                  <h1 className="text-xl font-semibold">Capture Your Photo</h1>
+                  <h1 className="text-xl font-semibold">Capture or upload your photo</h1>
                 </header>
-                <div className="pt-[72px] pb-24 w-full h-full flex justify-center">
+                <div className="pt-[72px] px-4 pb-24 w-full h-full flex flex-col justify-center items-center relative">
                   {selectedFrameIndex !== null && (
-                    <div className={cn("relative border-2 border-white rounded-lg overflow-clip h-full w-auto transition-all duration-300 ease-out",
-                      isFrameExpanded ? "scale-100 opacity-100" : "scale-75 opacity-0")}>
-                      {!loadedImages[selectedFrameIndex] && (
-                        <Skeleton className="absolute top-0 left-0 w-full h-full" />
-                      )}
-                      <Image
-                        src={TEMPLATES[selectedFrameIndex].template}
-                        alt="Selected Template"
-                        width={1080}
-                        height={1920}
-                        className={cn(
-                          "object-contain pointer-events-none w-full h-full",
-                          loadedImages[selectedFrameIndex] ? "opacity-100" : "opacity-0"
+                    <div className="aspect-[9/16] max-w-[420px]">
+                      <div className={cn("relative border-2 border-white rounded-lg overflow-clip h-full w-auto transition-all duration-300 ease-out",
+                        isFrameExpanded ? "scale-100 opacity-100" : "scale-75 opacity-0")}>
+                        {!loadedImages[selectedFrameIndex] && (
+                          <Skeleton className="absolute top-0 left-0 w-full h-full" />
                         )}
-                        priority
-                        onLoad={() => handleImageLoad(selectedFrameIndex)}
-                      />
+                        <Image
+                          src={TEMPLATES[selectedFrameIndex].template}
+                          alt="Selected Template"
+                          width={1080}
+                          height={1920}
+                          className={cn(
+                            "object-contain pointer-events-none w-full h-full",
+                            loadedImages[selectedFrameIndex] ? "opacity-100" : "opacity-0"
+                          )}
+                          priority
+                          onLoad={() => handleImageLoad(selectedFrameIndex)}
+                        />
+                      </div>
                     </div>
                   )}
+                  <div className={cn("relative w-full mt-6 flex items-center justify-center gap-4 z-10 transition-all duration-500 delay-500",
+                    isFrameExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                  )}>
+                    <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
+                      <UploadCloud className="mr-1 h-6 w-6" /> Upload Photo
+                    </Button>
+                    <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
+                    <Button onClick={startCamera} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                      <Camera className="mr-1 h-6 w-6" /> Use Camera
+                    </Button>
+                  </div>
                 </div>
 
-                <div className={cn("absolute bottom-8 left-0 right-0 flex items-center justify-center gap-4 px-4 z-10 transition-all duration-500 delay-500",
-                  isFrameExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                )}>
-                  <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
-                    <UploadCloud className="mr-1 h-6 w-6" /> Upload Photo
-                  </Button>
-                  <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
-                  <Button onClick={startCamera} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                    <Camera className="mr-1 h-6 w-6" /> Use Camera
-                  </Button>
-                </div>
+
               </div>
             </div>
           </div>
