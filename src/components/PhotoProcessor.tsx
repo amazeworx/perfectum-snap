@@ -470,7 +470,7 @@ export default function PhotoProcessor() {
       {step === 'frame-selection' && (
         <>
           <div className={cn(
-            "h-dvh flex flex-col relative overflow-hidden",
+            "h-dvh flex flex-col relative overflow-hidden transition-opacity duration-500",
             isFrameExpanded ? "opacity-0 pointer-events-none" : "opacity-1"
           )}>
             <div className="flex flex-col">
@@ -500,7 +500,7 @@ export default function PhotoProcessor() {
                         width={180}
                         height={320}
                         className={cn(
-                          "w-full h-full object-cover transition-opacity duration-300",
+                          "w-full h-full object-contain transition-opacity duration-300",
                           loadedImages[index] ? "opacity-100" : "opacity-0"
                         )}
                         onLoad={() => handleImageLoad(index)}
@@ -511,54 +511,6 @@ export default function PhotoProcessor() {
                 </div>
               </div>
             </div>
-            {/* <div className={cn(
-              "absolute inset-0 z-[60] flex flex-col transition-all duration-500",
-              isFrameExpanded ? "opacity-100 bg-black backdrop-blur-sm" : "opacity-0 pointer-events-none"
-            )}>
-              <header className="shrink-0 absolute top-0 left-0 right-0 z-50 flex items-center p-4">
-                <Button variant="ghost" size="icon" className="mr-2 text-white rounded-full hover:text-white active:text-white hover:bg-white/20 [&_svg]:size-5" onClick={handleCloseExpandedFrame}>
-                  <ArrowLeft className="h-6 w-6" />
-                </Button>
-                <h1 className="text-xl font-semibold">Capture or upload your photo</h1>
-              </header>
-              <div className="h-[72px] shrink-0" />
-              <div className="flex-1 flex flex-col justify-center items-center px-4 h-[70%]">
-                {selectedFrameIndex !== null && (
-                  <div className="flex-1 flex">
-                    <div className={cn("relative border-2 border-white rounded-lg overflow-clip flex-1 flex w-auto transition-all duration-300 ease-out",
-                      isFrameExpanded ? "scale-100 opacity-100" : "scale-75 opacity-0")}
-                    >
-                      {!loadedImages[selectedFrameIndex] && (
-                        <Skeleton className="absolute inset-0" />
-                      )}
-                      <Image
-                        src={TEMPLATES[selectedFrameIndex].template}
-                        alt="Selected Template"
-                        width={1080}
-                        height={1920}
-                        className={cn(
-                          "object-contain pointer-events-none",
-                          loadedImages[selectedFrameIndex] ? "opacity-100" : "opacity-0"
-                        )}
-                        priority
-                        onLoad={() => handleImageLoad(selectedFrameIndex)}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className={cn("shrink-0 relative w-full flex items-center justify-center gap-4 z-10 transition-all duration-500 delay-500 px-4 pb-8",
-                isFrameExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-              )}>
-                <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
-                  <UploadCloud className="mr-1 h-6 w-6" /> Upload Photo
-                </Button>
-                <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
-                <Button onClick={startCamera} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                  <Camera className="mr-1 h-6 w-6" /> Use Camera
-                </Button>
-              </div>
-            </div> */}
           </div>
           <div className={cn(
             "absolute inset-0 bg-black text-white overflow-hidden transition-opacity duration-500",
@@ -592,14 +544,19 @@ export default function PhotoProcessor() {
                   </div>
                 )}
               </main>
-              <footer className="shrink-0 w-full flex items-center justify-center gap-4 p-4 pb-8">
-                <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
-                  <UploadCloud className="mr-1 h-6 w-6" /> Upload Photo
-                </Button>
-                <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
-                <Button onClick={startCamera} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                  <Camera className="mr-1 h-6 w-6" /> Use Camera
-                </Button>
+              <footer className="shrink-0 w-full p-4 pb-8">
+                <div className={cn(
+                  "flex items-center gap-4 translate-y-12 justify-center transition-all duration-500 delay-300",
+                  isFrameExpanded ? "opacity-100 translate-y-0" : "translate-y-12 opacity-0 pointer-events-none"
+                )}>
+                  <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
+                    <UploadCloud className="mr-1 h-6 w-6" /> Upload Photo
+                  </Button>
+                  <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
+                  <Button onClick={startCamera} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                    <Camera className="mr-1 h-6 w-6" /> Use Camera
+                  </Button>
+                </div>
               </footer>
             </div>
           </div>
