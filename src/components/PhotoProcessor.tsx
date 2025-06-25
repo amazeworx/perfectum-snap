@@ -1,3 +1,9 @@
+declare global {
+  interface Window {
+    dataLayer: any[];
+  }
+}
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -12,8 +18,6 @@ import { cn } from '@/lib/utils';
 
 const CANVAS_WIDTH = 360;
 const CANVAS_HEIGHT = 640;
-
-const LOCAL_URL = 'http://localhost:3000';
 
 const TEMPLATES = [
   {
@@ -171,6 +175,9 @@ export default function PhotoProcessor() {
       reader.onload = (e) => {
         setUserImageSrc(e.target?.result as string);
         setStep('preview');
+        if (typeof window !== "undefined" && window.dataLayer) {
+          window.dataLayer.push({ event: "upload_photo" });
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -272,6 +279,10 @@ export default function PhotoProcessor() {
       setUserImageSrc(tempCanvas.toDataURL('image/png'));
       setStep('preview');
     }
+
+    if (typeof window !== "undefined" && window.dataLayer) {
+      window.dataLayer.push({ event: "capture_photo" });
+    }
   };
 
   const handleDownload = () => {
@@ -282,6 +293,9 @@ export default function PhotoProcessor() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+    if (typeof window !== "undefined" && window.dataLayer) {
+      window.dataLayer.push({ event: "download_photo" });
     }
   };
 
@@ -296,9 +310,12 @@ export default function PhotoProcessor() {
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: 'My Perfectum Snap!',
-          text: 'Check out this photo I created with Perfectum Snap!',
+          title: 'BNI Titans Grand Launching with Perfectum and OOTB',
+          text: 'Check out this perfect moments with BNI Titans, Perfectum, and OOTB',
         });
+        if (typeof window !== "undefined" && window.dataLayer) {
+          window.dataLayer.push({ event: "share_photo" });
+        }
       } else {
         toast({ title: "Cannot Share", description: "Direct sharing is not supported on your browser/device. Please download the image.", variant: "default" });
       }
