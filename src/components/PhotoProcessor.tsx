@@ -23,22 +23,22 @@ const TEMPLATES = [
   {
     template: '/images/template-1.jpg',
     frame: '/images/frame-1.png',
-    hint: 'abstract modern'
+    hint: 'Template 1'
   },
   {
     template: '/images/template-2.jpg',
     frame: '/images/frame-2.png',
-    hint: 'vintage classic'
+    hint: 'Template 2'
   },
   {
     template: '/images/template-3.jpg',
     frame: '/images/frame-3.png',
-    hint: 'nature floral'
+    hint: 'Template 3'
   },
   {
     template: '/images/template-4.jpg',
     frame: '/images/frame-4.png',
-    hint: 'geometric pattern'
+    hint: 'Template 4'
   },
 ];
 
@@ -152,6 +152,14 @@ export default function PhotoProcessor() {
 
         setProcessedImageSrc(canvas.toDataURL('image/png'));
         setIsProcessing(false);
+
+        if (typeof window !== "undefined" && window.dataLayer && selectedFrameIndex !== null) {
+          window.dataLayer.push({
+            event: "template_processed",
+            template_index: selectedFrameIndex,
+            template_hint: TEMPLATES[selectedFrameIndex].hint
+          });
+        }
       };
 
       userImg.onerror = () => {
