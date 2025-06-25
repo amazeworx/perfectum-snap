@@ -469,94 +469,138 @@ export default function PhotoProcessor() {
 
       {step === 'frame-selection' && (
         <>
-          <div className="h-dvh relative overflow-hidden">
-            <header className="absolute top-0 left-0 right-0 z-50 flex items-center p-4">
-              <Link href="/" passHref>
-                <Button variant="ghost" size="icon" className="mr-2 text-white rounded-full hover:text-white active:text-white hover:bg-white/20 [&_svg]:size-5">
-                  <ArrowLeft className="h-6 w-6" />
-                </Button>
-              </Link>
-              <h1 className="text-xl font-semibold">Choose your frame</h1>
-            </header>
-
-            <main className="p-4 pt-[72px]">
-              <div className="grid grid-cols-2 gap-2">
-                {TEMPLATES.map((item, index) => (
-                  <div
-                    key={index}
-                    className="relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02] active:scale-95 shadow-md border border-gray-700"
-                    onClick={() => handleFrameSelect(index)}
-                  >
-                    {!loadedImages[index] && (
-                      <Skeleton className="absolute top-0 left-0 w-full h-full" />
-                    )}
-                    <Image
-                      src={item.template}
-                      alt={`Template ${index + 1}`}
-                      width={180}
-                      height={320}
-                      className={cn(
-                        "w-full h-full object-cover transition-opacity duration-300",
-                        loadedImages[index] ? "opacity-100" : "opacity-0"
-                      )}
-                      onLoad={() => handleImageLoad(index)}
-                      data-ai-hint={item.hint}
-                    />
-                  </div>
-                ))}
-              </div>
-            </main>
-
-            <div className={cn(
-              "absolute inset-0 z-[60] flex items-center justify-center transition-all duration-500",
-              isFrameExpanded ? "opacity-100 bg-black backdrop-blur-sm" : "opacity-0 pointer-events-none"
-            )}>
-              <div
-                className="relative w-full h-full">
-                <header className="absolute top-0 left-0 right-0 z-50 flex items-center p-4">
-                  <Button variant="ghost" size="icon" className="mr-2 text-white rounded-full hover:text-white active:text-white hover:bg-white/20 [&_svg]:size-5" onClick={handleCloseExpandedFrame}>
+          <div className={cn(
+            "h-dvh flex flex-col relative overflow-hidden",
+            isFrameExpanded ? "opacity-0 pointer-events-none" : "opacity-1"
+          )}>
+            <div className="flex flex-col">
+              <header className="shrink-0 absolute top-0 left-0 right-0 z-50 flex items-center p-4">
+                <Link href="/" passHref>
+                  <Button variant="ghost" size="icon" className="mr-2 text-white rounded-full hover:text-white active:text-white hover:bg-white/20 [&_svg]:size-5">
                     <ArrowLeft className="h-6 w-6" />
                   </Button>
-                  <h1 className="text-xl font-semibold">Capture or upload your photo</h1>
-                </header>
-                <div className="pt-[72px] px-4 pb-24 w-full h-full flex flex-col justify-center items-center relative">
-                  {selectedFrameIndex !== null && (
-                    <div className="aspect-[9/16] max-w-[420px]">
-                      <div className={cn("relative border-2 border-white rounded-lg overflow-clip h-full w-auto transition-all duration-300 ease-out",
-                        isFrameExpanded ? "scale-100 opacity-100" : "scale-75 opacity-0")}>
-                        {!loadedImages[selectedFrameIndex] && (
-                          <Skeleton className="absolute top-0 left-0 w-full h-full" />
+                </Link>
+                <h1 className="text-xl font-semibold">Choose your frame</h1>
+              </header>
+              <div className="h-[72px] shrink-0" />
+              <div className="flex-1 flex flex-col justify-center items-center px-4">
+                <div className="grid grid-cols-2 gap-2 w-full">
+                  {TEMPLATES.map((item, index) => (
+                    <div
+                      key={index}
+                      className="relative rounded-lg overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02] active:scale-95 shadow-md border border-gray-700"
+                      onClick={() => handleFrameSelect(index)}
+                    >
+                      {!loadedImages[index] && (
+                        <Skeleton className="absolute top-0 left-0 w-full h-full" />
+                      )}
+                      <Image
+                        src={item.template}
+                        alt={`Template ${index + 1}`}
+                        width={180}
+                        height={320}
+                        className={cn(
+                          "w-full h-full object-cover transition-opacity duration-300",
+                          loadedImages[index] ? "opacity-100" : "opacity-0"
                         )}
-                        <Image
-                          src={TEMPLATES[selectedFrameIndex].template}
-                          alt="Selected Template"
-                          width={1080}
-                          height={1920}
-                          className={cn(
-                            "object-contain pointer-events-none w-full h-full",
-                            loadedImages[selectedFrameIndex] ? "opacity-100" : "opacity-0"
-                          )}
-                          priority
-                          onLoad={() => handleImageLoad(selectedFrameIndex)}
-                        />
-                      </div>
+                        onLoad={() => handleImageLoad(index)}
+                        data-ai-hint={item.hint}
+                      />
                     </div>
-                  )}
-                  <div className={cn("relative w-full mt-6 flex items-center justify-center gap-4 z-10 transition-all duration-500 delay-500",
-                    isFrameExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                  )}>
-                    <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
-                      <UploadCloud className="mr-1 h-6 w-6" /> Upload Photo
-                    </Button>
-                    <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
-                    <Button onClick={startCamera} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                      <Camera className="mr-1 h-6 w-6" /> Use Camera
-                    </Button>
-                  </div>
+                  ))}
                 </div>
-
-
               </div>
+            </div>
+            {/* <div className={cn(
+              "absolute inset-0 z-[60] flex flex-col transition-all duration-500",
+              isFrameExpanded ? "opacity-100 bg-black backdrop-blur-sm" : "opacity-0 pointer-events-none"
+            )}>
+              <header className="shrink-0 absolute top-0 left-0 right-0 z-50 flex items-center p-4">
+                <Button variant="ghost" size="icon" className="mr-2 text-white rounded-full hover:text-white active:text-white hover:bg-white/20 [&_svg]:size-5" onClick={handleCloseExpandedFrame}>
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+                <h1 className="text-xl font-semibold">Capture or upload your photo</h1>
+              </header>
+              <div className="h-[72px] shrink-0" />
+              <div className="flex-1 flex flex-col justify-center items-center px-4 h-[70%]">
+                {selectedFrameIndex !== null && (
+                  <div className="flex-1 flex">
+                    <div className={cn("relative border-2 border-white rounded-lg overflow-clip flex-1 flex w-auto transition-all duration-300 ease-out",
+                      isFrameExpanded ? "scale-100 opacity-100" : "scale-75 opacity-0")}
+                    >
+                      {!loadedImages[selectedFrameIndex] && (
+                        <Skeleton className="absolute inset-0" />
+                      )}
+                      <Image
+                        src={TEMPLATES[selectedFrameIndex].template}
+                        alt="Selected Template"
+                        width={1080}
+                        height={1920}
+                        className={cn(
+                          "object-contain pointer-events-none",
+                          loadedImages[selectedFrameIndex] ? "opacity-100" : "opacity-0"
+                        )}
+                        priority
+                        onLoad={() => handleImageLoad(selectedFrameIndex)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className={cn("shrink-0 relative w-full flex items-center justify-center gap-4 z-10 transition-all duration-500 delay-500 px-4 pb-8",
+                isFrameExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              )}>
+                <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
+                  <UploadCloud className="mr-1 h-6 w-6" /> Upload Photo
+                </Button>
+                <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
+                <Button onClick={startCamera} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                  <Camera className="mr-1 h-6 w-6" /> Use Camera
+                </Button>
+              </div>
+            </div> */}
+          </div>
+          <div className={cn(
+            "absolute inset-0 bg-black text-white overflow-hidden transition-opacity duration-500",
+            isFrameExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
+          )}>
+            <div className="h-dvh flex flex-col">
+              <header className="shrink-0 p-4 flex items-center">
+                <Button variant="ghost" size="icon" className="mr-2 text-white rounded-full hover:text-white active:text-white hover:bg-white/20 [&_svg]:size-5" onClick={handleCloseExpandedFrame}>
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+                <h1 className="text-xl font-semibold">Capture your photo</h1>
+              </header>
+              <main className="flex-1 flex flex-col justify-center items-center px-4 min-h-0">
+                {selectedFrameIndex !== null && (
+                  <div className="relative flex justify-center items-center w-full h-full">
+                    {!loadedImages[selectedFrameIndex] && (
+                      <Skeleton className="absolute inset-0" />
+                    )}
+                    <Image
+                      src={TEMPLATES[selectedFrameIndex].template}
+                      alt="Selected Template"
+                      width={1080}
+                      height={1920}
+                      className={cn(
+                        "h-full w-auto pointer-events-none transition-opacity border-2 border-white rounded-lg overflow-clip",
+                        loadedImages[selectedFrameIndex] ? "opacity-100" : "opacity-0"
+                      )}
+                      priority
+                      onLoad={() => handleImageLoad(selectedFrameIndex)}
+                    />
+                  </div>
+                )}
+              </main>
+              <footer className="shrink-0 w-full flex items-center justify-center gap-4 p-4 pb-8">
+                <Button onClick={() => fileInputRef.current?.click()} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg">
+                  <UploadCloud className="mr-1 h-6 w-6" /> Upload Photo
+                </Button>
+                <Input type="file" accept="image/*" onChange={handleFileUpload} ref={fileInputRef} className="hidden" />
+                <Button onClick={startCamera} size="lg" className="w-full py-3 px-4 rounded-full text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                  <Camera className="mr-1 h-6 w-6" /> Use Camera
+                </Button>
+              </footer>
             </div>
           </div>
         </>
