@@ -268,7 +268,7 @@ export default function PhotoProcessor() {
   useEffect(() => {
     const enableCamera = async (mode: 'user' | 'environment') => {
       try {
-        const constraints = { video: { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: { exact: mode } } };
+        const constraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { exact: mode } } };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -276,7 +276,7 @@ export default function PhotoProcessor() {
       } catch (err) {
         console.warn("Exact facing mode failed, falling back.", err);
         try {
-          const fallbackConstraints = { video: { width: { ideal: 720 }, height: { ideal: 1280 }, facingMode: mode } };
+          const fallbackConstraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: mode } };
           const stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
