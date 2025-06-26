@@ -52,29 +52,32 @@ export default function HomePage() {
             </div>
           </div>
         </main>
-        <footer className="mt-auto mb-6 border rounded-xl overflow-clip shadow-md relative z-10 animate-fade-up animate-once animate-duration-1000 animate-ease-in-out animate-delay-[2000ms]">
-          <div className="flex space-x-4 items-center justify-center p-4 bg-white">
-            <h2 className="text-xs font-bold">Sponsored by:</h2>
-            <div className="flex space-x-4">
-              <Image
-                src="/images/logo-perfectum.png"
-                alt="Perfectum"
-                width={290}
-                height={390}
-                className="h-[72px] w-auto"
-                data-ai-hint="logo perfectum"
-              />
-              <Image
-                src="/images/logo-ootb.png"
-                alt="OOTB"
-                width={290}
-                height={390}
-                className="h-[72px] w-auto"
-                data-ai-hint="logo ootb"
-              />
+        <footer className="mt-auto mb-0 relative z-10 animate-fade-up animate-once animate-duration-1000 animate-ease-in-out animate-delay-[2000ms]">
+          <div className="border rounded-xl overflow-clip shadow-md">
+            <div className="flex space-x-4 items-center justify-center p-3 bg-white">
+              <h2 className="text-xs font-bold">Sponsored by:</h2>
+              <div className="flex space-x-4">
+                <Image
+                  src="/images/logo-perfectum.png"
+                  alt="Perfectum"
+                  width={290}
+                  height={390}
+                  className="h-[72px] w-auto"
+                  data-ai-hint="logo perfectum"
+                />
+                <Image
+                  src="/images/logo-ootb.png"
+                  alt="OOTB"
+                  width={290}
+                  height={390}
+                  className="h-[72px] w-auto"
+                  data-ai-hint="logo ootb"
+                />
+              </div>
             </div>
+            <div className="text-center border-t py-2 bg-slate-200"><span className='text-xs font-semibold'><em>Don't forget to follow and tag our Instagram</em></span> <span className='text-xl'>👌</span></div>
           </div>
-          <div className="text-center border-t py-2 bg-slate-200"><span className='text-xs font-semibold'><em>Don't forget to follow and tag our Instagram</em></span> <span className='text-xl'>👌</span></div>
+          <div className="mt-6 pb-1 text-xs text-center text-slate-400 flex items-center justify-center"><div className='inline-flex items-center gap-1'>Made with <span className='text-lg inline-block mx-0.5'>🫶</span> by <span className='font-semibold'>X10 Digital</span></div></div>
         </footer>
       </div>
       <AnimatedGridPattern
