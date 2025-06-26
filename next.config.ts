@@ -34,6 +34,12 @@ const nextConfig: NextConfig = {
         port: '9002',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: '192.168.1.2',
+        port: '9002',
+        pathname: '/**',
+      },
     ],
   },
   experimental: {
